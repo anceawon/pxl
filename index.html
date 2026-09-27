@@ -55,24 +55,30 @@
     </div>
 
     <!-- 헤더 -->
-    <header class="sticky top-0 z-40 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 px-4 py-2.5 flex items-center justify-between gap-2">
-        <button onclick="goHome()" class="flex items-center gap-2 text-lg font-extrabold tracking-tight">
-            <i class="fa-solid fa-cloud text-2xl text-[#73B5FE]"></i>
+    <header class="sticky top-0 z-40 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 px-3 py-2.5 flex items-center justify-between gap-1">
+        <button onclick="goHome()" class="flex items-center gap-1.5 text-base sm:text-lg font-extrabold tracking-tight">
+            <i class="fa-solid fa-cloud text-xl text-[#73B5FE]"></i>
             <span class="hidden sm:inline">PixelHub</span>
         </button>
         <div class="flex items-center bg-gray-100 dark:bg-gray-800 p-1 rounded-full text-xs font-semibold">
-            <button id="tabVideoBtn" onclick="switchTab('video')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white transition">
+            <button id="tabVideoBtn" onclick="switchTab('video')" class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white transition">
                 <i class="fa-solid fa-film text-[#73B5FE]"></i><span>동영상</span>
             </button>
-            <button id="tabCommunityBtn" onclick="switchTab('community')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition">
+            <button id="tabCommunityBtn" onclick="switchTab('community')" class="flex items-center gap-1 px-2.5 py-1 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition">
                 <i class="fa-solid fa-comments"></i><span>커뮤니티</span>
             </button>
         </div>
-        <div class="flex items-center gap-2">
-            <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-xs font-medium">
-                <div id="userAvatarDot" class="w-4 h-4 rounded-full bg-[#73B5FE]"></div>
-                <span id="headerUserName">익명</span>
-            </div>
+        <div class="flex items-center gap-1 sm:gap-2">
+            <!-- 다크/라이트 모드 전환 버튼 -->
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition" title="화면 테마 변경">
+                <i id="themeIcon" class="fa-solid fa-moon"></i>
+            </button>
+            <!-- 프로필 수정 버튼 (클릭 가능) -->
+            <button onclick="openProfileModal()" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-xs font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition" title="프로필 수정">
+                <div id="userAvatarDot" class="w-3.5 h-3.5 rounded-full bg-[#73B5FE]"></div>
+                <span id="headerUserName" class="max-w-[60px] sm:max-w-none truncate">익명</span>
+            </button>
+            <!-- 관리자 버튼 -->
             <button onclick="switchTab('admin')" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 transition" title="관리자">
                 <i class="fa-solid fa-user-shield"></i>
             </button>
@@ -80,17 +86,17 @@
     </header>
 
     <!-- 메인 컨텐츠 -->
-    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col gap-5">
+    <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 flex flex-col gap-4 sm:gap-5">
         <section id="filterSection" class="flex flex-col gap-3">
             <div class="flex gap-2">
-                <input type="text" id="searchInput" oninput="renderMainView()" placeholder="검색어 입력..." class="flex-1 bg-gray-100 dark:bg-gray-800 text-xs sm:text-sm border border-gray-200 dark:border-gray-700 rounded-xl py-2.5 px-4 focus:outline-none">
-                <button onclick="openPostModal()" class="bg-[#73B5FE] text-white px-4 py-2.5 rounded-xl font-bold text-xs hover:opacity-90">
+                <input type="text" id="searchInput" oninput="renderMainView()" placeholder="검색어 입력..." class="flex-1 bg-gray-100 dark:bg-gray-800 text-xs sm:text-sm border border-gray-200 dark:border-gray-700 rounded-xl py-2.5 px-3.5 focus:outline-none">
+                <button onclick="openPostModal()" class="bg-[#73B5FE] text-white px-3.5 py-2.5 rounded-xl font-bold text-xs hover:opacity-90 flex items-center gap-1 whitespace-nowrap">
                     <i class="fa-solid fa-plus"></i> <span>글 등록하기</span>
                 </button>
             </div>
         </section>
 
-        <section id="videoSection" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5"></section>
+        <section id="videoSection" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5"></section>
         <section id="communitySection" class="hidden flex flex-col gap-4"></section>
         <section id="adminSection" class="hidden flex flex-col gap-4">
             <h2 class="font-bold text-lg border-b pb-2">⚙️ 관리자 대시보드</h2>
@@ -148,16 +154,45 @@
         let globalPosts = [];
 
         document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
             initUserProfile();
             listenRealtimeData();
         });
 
+        // 테마 설정 (블랙 / 화이트)
+        function initTheme() {
+            const savedTheme = localStorage.getItem('pixel_theme');
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                document.getElementById('themeIcon').className = 'fa-solid fa-sun text-yellow-400';
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.getElementById('themeIcon').className = 'fa-solid fa-moon';
+            }
+        }
+
+        function toggleDarkMode() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('pixel_theme', isDark ? 'dark' : 'light');
+            document.getElementById('themeIcon').className = isDark ? 'fa-solid fa-sun text-yellow-400' : 'fa-solid fa-moon';
+        }
+
+        // 프로필 설정
         function initUserProfile() {
             if (!currentUser) {
-                document.getElementById('userProfileModal').classList.remove('hidden');
+                openProfileModal();
             } else {
+                selectedColor = currentUser.color || '#73B5FE';
                 updateProfileUI();
             }
+        }
+
+        function openProfileModal() {
+            if (currentUser) {
+                document.getElementById('initNicknameInput').value = currentUser.name || '';
+                selectColor(currentUser.color || '#73B5FE');
+            }
+            document.getElementById('userProfileModal').classList.remove('hidden');
         }
 
         function selectColor(color) { 
@@ -213,11 +248,11 @@
             const cBtn = document.getElementById('tabCommunityBtn');
             
             if (tab === 'video') {
-                vBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white transition";
-                cBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition";
+                vBtn.className = "flex items-center gap-1 px-2.5 py-1 rounded-full bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white transition";
+                cBtn.className = "flex items-center gap-1 px-2.5 py-1 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition";
             } else if (tab === 'community') {
-                cBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white transition";
-                vBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition";
+                cBtn.className = "flex items-center gap-1 px-2.5 py-1 rounded-full bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white transition";
+                vBtn.className = "flex items-center gap-1 px-2.5 py-1 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition";
             }
             
             renderMainView();
