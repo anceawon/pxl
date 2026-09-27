@@ -55,7 +55,6 @@
                 <button type="button" id="tabSignupBtn" onclick="switchAuthTab('signup')" class="flex-1 py-2 font-bold text-sm text-gray-400 border-b-2 border-transparent">회원가입</button>
             </div>
 
-            <!-- 로그인 -->
             <form id="loginForm" onsubmit="handleLogin(event)" class="flex flex-col gap-3 text-xs">
                 <div>
                     <label class="block font-semibold mb-1">이메일</label>
@@ -69,7 +68,6 @@
                 <button type="submit" class="w-full py-3 mt-1 rounded-xl bg-[#73B5FE] text-white font-bold text-sm hover:opacity-90 transition">로그인</button>
             </form>
 
-            <!-- 회원가입 -->
             <form id="signupForm" onsubmit="handleSignup(event)" class="hidden flex flex-col gap-3 text-xs">
                 <div>
                     <label class="block font-semibold mb-1">이메일</label>
@@ -144,7 +142,93 @@
         </div>
     </div>
 
-    <!-- 헤더 -->
+    <!-- 멤버 조 이름 조합표 모달 -->
+    <div id="teamNamesModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-gray-900 rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col gap-4 max-h-[90vh] relative">
+            <button type="button" onclick="closeTeamNamesModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <h2 class="text-base font-bold flex items-center gap-2">
+                <i class="fa-solid fa-users-viewfinder text-[#73B5FE]"></i>
+                <span>멤버별 조 이름 조합표</span>
+            </h2>
+
+            <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-center border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
+                            <th class="p-2 border border-gray-200 dark:border-gray-700">@aonebande</th>
+                            <th class="p-2 border border-gray-200 dark:border-gray-700 bg-blue-100 dark:bg-blue-900/40">잠뜰</th>
+                            <th class="p-2 border border-gray-200 dark:border-gray-700 bg-yellow-100 dark:bg-yellow-900/40">각별</th>
+                            <th class="p-2 border border-gray-200 dark:border-gray-700 bg-green-100 dark:bg-green-900/40">공룡</th>
+                            <th class="p-2 border border-gray-200 dark:border-gray-700 bg-purple-100 dark:bg-purple-900/40">수현</th>
+                            <th class="p-2 border border-gray-200 dark:border-gray-700 bg-red-100 dark:bg-red-900/40">라더</th>
+                            <th class="p-2 border border-gray-200 dark:border-gray-700 bg-orange-100 dark:bg-orange-900/40">덕개</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th class="p-2 border border-gray-200 dark:border-gray-700 bg-blue-100 dark:bg-blue-900/40">잠뜰</th>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700 bg-blue-50 dark:bg-blue-950/30">-</td>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700">이과조<br>연장자조</td>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700">주작조</td>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700">잠컴조<br>집사조</td>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700">바다조</td>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700">저녁노을조</td>
+                        </tr>
+                        <tr>
+                            <th class="p-2 border border-gray-200 dark:border-gray-700 bg-yellow-100 dark:bg-yellow-900/40">각별</th>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700">이과조<br>연장자조</td>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700 bg-yellow-50 dark:bg-yellow-950/30">-</td>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700">후드조<br>공각</td>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700">원혐조</td>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700">괴짜조</td>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700">각개전투조<br>맏막조</td>
+                        </tr>
+                        <tr>
+                            <th class="p-2 border border-gray-200 dark:border-gray-700 bg-green-100 dark:bg-green-900/40">공룡</th>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700">주작조</td>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700">후드조<br>공각</td>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700 bg-green-50 dark:bg-green-950/30">-</td>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700">오로라조</td>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700">이빨조</td>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700">부산조</td>
+                        </tr>
+                        <tr>
+                            <th class="p-2 border border-gray-200 dark:border-gray-700 bg-purple-100 dark:bg-purple-900/40">수현</th>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700">잠컴조<br>집사조</td>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700">원혐조</td>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700">오로라조</td>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700 bg-purple-50 dark:bg-purple-950/30">-</td>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700">황혼조</td>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700">인덕션조<br>무해조</td>
+                        </tr>
+                        <tr>
+                            <th class="p-2 border border-gray-200 dark:border-gray-700 bg-red-100 dark:bg-red-900/40">라더</th>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700">바다조</td>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700">괴짜조</td>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700">이빨조</td>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700">황혼조</td>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700 bg-red-50 dark:bg-red-950/30">-</td>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700">라떡조</td>
+                        </tr>
+                        <tr>
+                            <th class="p-2 border border-gray-200 dark:border-gray-700 bg-orange-100 dark:border-gray-700 bg-orange-100 dark:bg-orange-900/40">덕개</th>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700">저녁노을조</td>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700">각개전투조<br>맏막조</td>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700">부산조</td>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700">인덕션조<br>무해조</td>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700">라떡조</td>
+                            <td class="p-2 border border-gray-200 dark:border-gray-700 bg-orange-50 dark:bg-orange-950/30">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 헤더 영역 -->
     <header class="sticky top-0 z-40 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center justify-between gap-2">
         <button onclick="goHome()" class="flex items-center gap-2 text-lg font-extrabold tracking-tight">
             <i class="fa-solid fa-cloud text-xl text-[#73B5FE]"></i>
@@ -158,10 +242,13 @@
             <button id="tabCommunityBtn" onclick="switchTab('community')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition">
                 <i class="fa-solid fa-comments"></i><span>커뮤니티</span>
             </button>
+            <button onclick="openTeamNamesModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition">
+                <i class="fa-solid fa-table-cells text-amber-500"></i><span>조 이름</span>
+            </button>
         </div>
 
         <div class="flex items-center gap-2">
-            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition">
+            <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition" title="화면 테마 변경">
                 <i id="themeIcon" class="fa-solid fa-moon"></i>
             </button>
 
@@ -174,44 +261,20 @@
                 <span id="headerUserName">유저</span>
             </button>
 
-            <button onclick="switchTab('admin')" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 transition">
+            <button onclick="switchTab('admin')" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 transition" title="관리자">
                 <i class="fa-solid fa-user-shield"></i>
             </button>
         </div>
     </header>
 
-    <!-- 메인 컨텐츠 -->
+    <!-- 메인 컨텐츠 영역 -->
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col gap-5">
         <section id="filterSection" class="flex flex-col gap-3">
             <div class="flex gap-2">
-                <input type="text" id="searchInput" oninput="renderMainView()" placeholder="검색어를 입력하세요..." class="flex-1 bg-gray-100 dark:bg-gray-800 text-xs sm:text-sm border border-gray-200 dark:border-gray-700 rounded-xl py-2.5 px-3.5 focus:outline-none">
+                <input type="text" id="searchInput" oninput="renderMainView()" placeholder="멤버 이름(라더, 덕개, 각별, 공룡, 잠뜰, 수현)이나 키워드로 검색..." class="flex-1 bg-gray-100 dark:bg-gray-800 text-xs sm:text-sm border border-gray-200 dark:border-gray-700 rounded-xl py-2.5 px-3.5 focus:outline-none">
                 <button onclick="openPostModal()" class="bg-[#73B5FE] text-white px-4 py-2.5 rounded-xl font-bold text-xs hover:opacity-90 flex items-center gap-1.5 whitespace-nowrap">
                     <i class="fa-solid fa-plus"></i> <span>글 작성하기</span>
                 </button>
-            </div>
-            
-            <!-- 조 이름 바로 확인용 계산기/조회기 -->
-            <div class="bg-gray-50 dark:bg-gray-900 p-3 rounded-xl border border-gray-200 dark:border-gray-800 flex flex-wrap items-center gap-2 text-xs">
-                <span class="font-bold text-[#73B5FE]"><i class="fa-solid fa-users"></i> 조 이름 확인:</span>
-                <select id="teamMember1" onchange="updateTeamNameDisplay()" class="bg-white dark:bg-gray-800 border rounded p-1">
-                    <option value="잠뜰">잠뜰</option>
-                    <option value="각별">각별</option>
-                    <option value="공룡">공룡</option>
-                    <option value="수현">수현</option>
-                    <option value="라더">라더</option>
-                    <option value="덕개">덕개</option>
-                </select>
-                <span>+</span>
-                <select id="teamMember2" onchange="updateTeamNameDisplay()" class="bg-white dark:bg-gray-800 border rounded p-1">
-                    <option value="각별">각별</option>
-                    <option value="잠뜰">잠뜰</option>
-                    <option value="공룡">공룡</option>
-                    <option value="수현">수현</option>
-                    <option value="라더">라더</option>
-                    <option value="덕개">덕개</option>
-                </select>
-                <span>➔</span>
-                <span id="teamNameResult" class="font-extrabold text-brand bg-brand/10 px-2.5 py-1 rounded-lg">이과조 / 연장자조</span>
             </div>
         </section>
 
@@ -266,37 +329,15 @@
         const auth = firebase.auth();
         const db = firebase.database();
 
-        // 📌 이미지 표 기반 조 이름 데이터베이스
-        const TEAM_NAMES = {
-            "잠뜰_각별": "이과조 / 연장자조",
-            "잠뜰_공룡": "주작조",
-            "잠뜰_수현": "잠컴조 / 집사조",
-            "잠뜰_라더": "바다조",
-            "잠뜰_덕개": "저녁노을조",
-            "각별_공룡": "후드조 / 공각",
-            "각별_수현": "원형조",
-            "각별_라더": "괴짜조",
-            "각별_덕개": "각개전투조 / 맏막조",
-            "공룡_수현": "오로라조",
-            "공룡_라더": "이빨조",
-            "공룡_덕개": "부산조",
-            "수현_라더": "황혼조",
-            "수현_덕개": "인덕션조 / 무해조",
-            "라더_덕개": "라떡조"
+        // 📌 멤버별 연관 검색어 키워드 매핑 데이터베이스
+        const MEMBER_KEYWORDS = {
+            "라더": ["라더", "상어", "용암상어", "빨간상어"],
+            "덕개": ["덕개", "강아지", "골든 리트리버", "고수채널"],
+            "각별": ["각별", "별", "단무지"],
+            "공룡": ["공룡", "앞치마"],
+            "잠뜰": ["잠뜰", "고래", "하늘고래", "리더", "팀장", "고수채널"],
+            "수현": ["수현", "토끼", "고수채널"]
         };
-
-        function getTeamName(m1, m2) {
-            if (m1 === m2) return "동일한 멤버입니다";
-            const key1 = `${m1}_${m2}`;
-            const key2 = `${m2}_${m1}`;
-            return TEAM_NAMES[key1] || TEAM_NAMES[key2] || "알 수 없는 조";
-        }
-
-        function updateTeamNameDisplay() {
-            const m1 = document.getElementById('teamMember1').value;
-            const m2 = document.getElementById('teamMember2').value;
-            document.getElementById('teamNameResult').innerText = getTeamName(m1, m2);
-        }
 
         const BANNED_NICKNAMES = [
             "라더", "덕개", "각별", "공룡", "잠뜰", "수현",
@@ -317,7 +358,6 @@
             listenRealtimeData();
             selectColor('#73B5FE', 'signup');
             selectColor('#73B5FE', 'profile');
-            updateTeamNameDisplay();
         });
 
         function initTheme() {
@@ -379,158 +419,417 @@
         function switchAuthTab(tab) {
             const loginForm = document.getElementById('loginForm');
             const signupForm = document.getElementById('signupForm');
-            const tabLoginBtn이미지에 첨부해주신 멤버별 조 이름 조합표 데이터와 관리자 비밀번호 요청(`2925`)을 모두 반영했습니다!
+            const tabLoginBtn = document.getElementById('tabLoginBtn');
+            const tabSignupBtn = document.getElementById('tabSignupBtn');
 
-새로운 기능으로 **조 이름 확인하기** 버튼(또는 탭)을 추가하여 멤버 간의 조합 명칭을 언제든지 한눈에 확인할 수 있는 표(Modal/Tab)를 통합했습니다.
+            document.getElementById('loginErrorText').classList.add('hidden');
+            document.getElementById('signupErrorText').classList.add('hidden');
 
----
+            if (tab === 'login') {
+                loginForm.classList.remove('hidden');
+                signupForm.classList.add('hidden');
+                tabLoginBtn.className = "flex-1 py-2 font-bold text-sm text-[#73B5FE] border-b-2 border-[#73B5FE]";
+                tabSignupBtn.className = "flex-1 py-2 font-bold text-sm text-gray-400 border-b-2 border-transparent";
+            } else {
+                loginForm.classList.add('hidden');
+                signupForm.classList.remove('hidden');
+                tabSignupBtn.className = "flex-1 py-2 font-bold text-sm text-[#73B5FE] border-b-2 border-[#73B5FE]";
+                tabLoginBtn.className = "flex-1 py-2 font-bold text-sm text-gray-400 border-b-2 border-transparent";
+            }
+        }
 
-### 🛠️ 수정 및 추가된 내용
-1. **관리자 비밀번호 변경**: `1234` → `2925`
-2. **조 이름 조합표 추가**:
-   * 헤더 영역에 **"조 이름"** 버튼을 배치했습니다.
-   * 클릭 시 보내주신 이미지 속 조합표(잠뜰, 각별, 공룡, 수현, 라더, 덕개 간의 모든 조 이름)가 깔끔한 테이블 형태로 열립니다.
-3. **기존 기능 유지**: 프로필 설정, 닉네임/색상 변경, 로그아웃, 회원탈퇴 기능도 그대로 유지됩니다.
+        function selectColor(color, mode) {
+            if (mode === 'signup') {
+                selectedSignupColor = color;
+                document.querySelectorAll('.signup-color-opt').forEach(btn => {
+                    if (btn.dataset.color === color) btn.classList.add('ring-gray-400', 'dark:ring-white');
+                    else btn.classList.remove('ring-gray-400', 'dark:ring-white');
+                });
+            } else {
+                selectedProfileColor = color;
+                document.querySelectorAll('.profile-color-opt').forEach(btn => {
+                    if (btn.dataset.color === color) btn.classList.add('ring-gray-400', 'dark:ring-white');
+                    else btn.classList.remove('ring-gray-400', 'dark:ring-white');
+                });
+            }
+        }
 
----
+        async function handleGoogleLogin() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            try {
+                await auth.signInWithPopup(provider);
+                closeAuthModal();
+            } catch (err) {
+                alert('Google 로그인 오류: ' + err.message);
+            }
+        }
 
-### 📜 전체 코드 (`index.html`)
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const pw = document.getElementById('loginPassword').value;
+            const errorText = document.getElementById('loginErrorText');
+            errorText.classList.add('hidden');
 
-아래 코드를 전체 복사하여 GitHub의 `index.html` 파일에 덮어씌워 적용해 보세요!
+            try {
+                await auth.signInWithEmailAndPassword(email, pw);
+                closeAuthModal();
+            } catch (err) {
+                errorText.innerText = "이메일 또는 비밀번호가 잘못되었습니다.";
+                errorText.classList.remove('hidden');
+            }
+        }
 
-```html
-<!DOCTYPE html>
-<html lang="ko" class="light">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PixelHub</title>
-    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: { extend: { colors: { brand: '#73B5FE' } } }
+        async function handleSignup(e) {
+            e.preventDefault();
+            const email = document.getElementById('signupEmail').value;
+            const pw = document.getElementById('signupPassword').value;
+            const nickname = document.getElementById('signupNickname').value.trim();
+            const errorText = document.getElementById('signupErrorText');
+            errorText.classList.add('hidden');
+
+            const lowerNick = nickname.toLowerCase();
+            if (BANNED_NICKNAMES.some(banned => lowerNick.includes(banned))) {
+                errorText.innerText = "사용할 수 없는 닉네임입니다.";
+                errorText.classList.remove('hidden');
+                return;
+            }
+
+            const usersSnap = await db.ref('users').once('value');
+            const users = usersSnap.val();
+            if (users) {
+                const isDup = Object.values(users).some(u => u.name && u.name.toLowerCase() === lowerNick);
+                if (isDup) {
+                    errorText.innerText = "이미 사용 중인 닉네임입니다.";
+                    errorText.classList.remove('hidden');
+                    return;
+                }
+            }
+
+            try {
+                const res = await auth.createUserWithEmailAndPassword(email, pw);
+                await db.ref('users/' + res.user.uid).set({
+                    name: nickname,
+                    color: selectedSignupColor,
+                    email: email
+                });
+                closeAuthModal();
+            } catch (err) {
+                if (err.code === 'auth/email-already-in-use') {
+                    errorText.innerText = "이미 가입되어 있는 이메일입니다.";
+                } else {
+                    errorText.innerText = err.message;
+                }
+                errorText.classList.add('hidden');
+            }
+        }
+
+        function openProfileModal() {
+            if (!currentUserData) return openAuthModal();
+            document.getElementById('profileUserEmail').value = currentUserData.email;
+            document.getElementById('profileNicknameInput').value = currentUserData.name;
+            document.getElementById('profileErrorText').classList.add('hidden');
+            selectColor(currentUserData.color || '#73B5FE', 'profile');
+            document.getElementById('userProfileModal').classList.remove('hidden');
+        }
+
+        function closeProfileModal() {
+            document.getElementById('userProfileModal').classList.add('hidden');
+        }
+
+        function openTeamNamesModal() {
+            document.getElementById('teamNamesModal').classList.remove('hidden');
+        }
+
+        function closeTeamNamesModal() {
+            document.getElementById('teamNamesModal').classList.add('hidden');
+        }
+
+        async function handleProfileUpdate(e) {
+            e.preventDefault();
+            if (!currentUserData) return;
+
+            const newNick = document.getElementById('profileNicknameInput').value.trim();
+            const errorText = document.getElementById('profileErrorText');
+            errorText.classList.add('hidden');
+
+            const lowerNick = newNick.toLowerCase();
+            if (BANNED_NICKNAMES.some(banned => lowerNick.includes(banned))) {
+                errorText.innerText = "사용할 수 없는 닉네임입니다.";
+                errorText.classList.remove('hidden');
+                return;
+            }
+
+            if (newNick !== currentUserData.name) {
+                const usersSnap = await db.ref('users').once('value');
+                const users = usersSnap.val();
+                if (users) {
+                    const isDup = Object.entries(users).some(([uid, u]) => uid !== currentUserData.uid && u.name && u.name.toLowerCase() === lowerNick);
+                    if (isDup) {
+                        errorText.innerText = "이미 사용 중인 닉네임입니다.";
+                        errorText.classList.remove('hidden');
+                        return;
+                    }
+                }
+            }
+
+            try {
+                await db.ref('users/' + currentUserData.uid).update({
+                    name: newNick,
+                    color: selectedProfileColor
+                });
+
+                currentUserData.name = newNick;
+                currentUserData.color = selectedProfileColor;
+
+                document.getElementById('headerUserName').innerText = newNick;
+                document.getElementById('userAvatarDot').style.backgroundColor = selectedProfileColor;
+
+                alert('프로필이 정상적으로 수정되었습니다!');
+                closeProfileModal();
+            } catch(err) {
+                errorText.innerText = "프로필 수정 실패: " + err.message;
+                errorText.classList.remove('hidden');
+            }
+        }
+
+        function handleLogout() {
+            auth.signOut().then(() => {
+                closeProfileModal();
+            });
+        }
+
+        async function handleDeleteAccount() {
+            if (!currentUserData) return;
+            if (confirm("정말로 탈퇴하시겠습니까?\n작성한 프로필 데이터가 삭제되며 계정이 복구되지 않습니다.")) {
+                try {
+                    const user = auth.currentUser;
+                    await db.ref('users/' + currentUserData.uid).remove();
+                    await user.delete();
+                    alert("성공적으로 탈퇴되었습니다.");
+                    closeProfileModal();
+                } catch (err) {
+                    alert("회원 탈퇴 중 오류 발생: " + err.message + "\n(오래 전에 로그인한 경우 재로그인 후 시도해 주세요)");
+                }
+            }
+        }
+
+        function listenRealtimeData() {
+            db.ref('posts').on('value', snapshot => {
+                const data = snapshot.val();
+                globalVideos = [];
+                globalPosts = [];
+
+                if (data) {
+                    Object.keys(data).forEach(key => {
+                        const item = { id: key, ...data[key] };
+                        if (item.type === 'video') globalVideos.push(item);
+                        else globalPosts.push(item);
+                    });
+                }
+                renderMainView();
+            });
+        }
+
+        function switchTab(tab) {
+            if (tab === 'admin') {
+                const pw = prompt("관리자 비밀번호를 입력하세요:");
+                if (pw !== "2925") return alert("비밀번호가 틀렸습니다.");
+            }
+            currentTab = tab;
+            
+            const vBtn = document.getElementById('tabVideoBtn');
+            const cBtn = document.getElementById('tabCommunityBtn');
+            
+            if (tab === 'video') {
+                vBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white transition";
+                cBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition";
+            } else if (tab === 'community') {
+                cBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white transition";
+                vBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition";
+            }
+            
+            renderMainView();
+        }
+
+        function goHome() { switchTab('video'); }
+
+        // 🔍 검색 필터링 로직 (멤버별 연관 단어 포함 검색 지원)
+        function checkMatchesQuery(item, query) {
+            if (!query) return true;
+            const textToSearch = (item.title + " " + (item.content || "")).toLowerCase();
+            const lowerQuery = query.toLowerCase();
+
+            // 1. 직접 검색어 포함 여부 확인
+            if (textToSearch.includes(lowerQuery)) return true;
+
+            // 2. 멤버 이름 검색 시 연관 키워드까지 확장해서 확인
+            for (const [member, keywords] of Object.entries(MEMBER_KEYWORDS)) {
+                if (lowerQuery.includes(member.toLowerCase())) {
+                    // 검색어가 멤버 이름(예: '라더')을 포함하면 해당 멤버의 키워드 중 하나라도 제목/내용에 포함되는지 확인
+                    if (keywords.some(kw => textToSearch.includes(kw.toLowerCase()))) {
+                        return true;
+                    }
+                }
+            }
+
+            // 3. 반대로 사용자가 연관 단어(예: '상어', '토끼', '단무지')를 검색했을 때도 해당 멤버 글이 매칭되도록 확인
+            for (const [member, keywords] of Object.entries(MEMBER_KEYWORDS)) {
+                if (keywords.some(kw => kw.toLowerCase().includes(lowerQuery))) {
+                    if (textToSearch.includes(member.toLowerCase())) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        function renderMainView() {
+            const query = document.getElementById('searchInput').value.trim();
+            document.getElementById('videoSection').classList.add('hidden');
+            document.getElementById('communitySection').classList.add('hidden');
+            document.getElementById('adminSection').classList.add('hidden');
+
+            if (currentTab === 'video') {
+                document.getElementById('videoSection').classList.remove('hidden');
+                const container = document.getElementById('videoSection');
+                const filtered = globalVideos.filter(v => checkMatchesQuery(v, query));
+                
+                container.innerHTML = filtered.length === 0 ? '<div class="col-span-full text-center text-xs text-gray-400 py-10">등록된 동영상이 없습니다.</div>' :
+                    filtered.map(v => `
+                        <div class="p-4 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 flex flex-col justify-between gap-3">
+                            <div>
+                                ${v.mediaUrl ? `<video src="${v.mediaUrl}" controls playsinline class="w-full h-48 object-cover rounded-lg mb-2 bg-black"></video>` : ''}
+                                <h4 class="font-bold text-sm mb-1">${v.title}</h4>
+                                <p class="text-xs text-gray-600 dark:text-gray-300 break-all">${v.content || ''}</p>
+                            </div>
+                            <div class="flex items-center gap-1.5 border-t border-gray-200 dark:border-gray-800 pt-2">
+                                <div class="w-3 h-3 rounded-full" style="background-color: ${v.color || '#73B5FE'}"></div>
+                                <span class="text-[11px] font-medium text-gray-500">${v.author}</span>
+                            </div>
+                        </div>
+                    `).join('');
+            } else if (currentTab === 'community') {
+                document.getElementById('communitySection').classList.remove('hidden');
+                const container = document.getElementById('communitySection');
+                const filtered = globalPosts.filter(p => checkMatchesQuery(p, query));
+
+                container.innerHTML = filtered.length === 0 ? '<div class="text-center text-xs text-gray-400 py-10">작성된 게시글이 없습니다.</div>' :
+                    filtered.map(p => `
+                        <div class="p-4 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 flex flex-col justify-between gap-3">
+                            <div>
+                                <h4 class="font-bold text-sm mb-1">${p.title}</h4>
+                                <p class="text-xs text-gray-600 dark:text-gray-300 mb-2 break-all">${p.content || ''}</p>
+                                ${p.mediaUrl ? (p.mediaType === 'video' ? 
+                                    `<video src="${p.mediaUrl}" controls playsinline class="w-full max-h-80 rounded-lg bg-black"></video>` : 
+                                    `<img src="${p.mediaUrl}" class="w-full max-h-80 object-cover rounded-lg">`) : ''}
+                            </div>
+                            <div class="flex items-center gap-1.5 border-t border-gray-200 dark:border-gray-700 pt-2">
+                                <div class="w-3 h-3 rounded-full" style="background-color: ${p.color || '#73B5FE'}"></div>
+                                <span class="text-[11px] font-medium text-gray-500">${p.author}</span>
+                            </div>
+                        </div>
+                    `).join('');
+            } else if (currentTab === 'admin') {
+                document.getElementById('adminSection').classList.remove('hidden');
+                const container = document.getElementById('adminPostList');
+                const all = [...globalVideos, ...globalPosts];
+                container.innerHTML = all.length === 0 ? '<div class="text-xs text-gray-400 py-4">게시물이 없습니다.</div>' :
+                    all.map(item => `
+                        <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg text-xs border border-gray-200 dark:border-gray-700">
+                            <span class="truncate max-w-[80%]">[${item.type}] <strong>${item.title}</strong> (${item.author})</span>
+                            <button onclick="deleteItem('${item.id}')" class="text-red-500 hover:text-red-700 font-bold px-2 py-1">삭제</button>
+                        </div>
+                    `).join('');
+            }
+        }
+
+        function openPostModal() { 
+            if (!currentUserData) return openAuthModal();
+            document.getElementById('postModal').classList.remove('hidden'); 
+        }
+
+        function closePostModal() { 
+            document.getElementById('postModal').classList.add('hidden'); 
+            document.getElementById('uploadProgressContainer').classList.add('hidden');
+            document.getElementById('submitBtn').disabled = false;
+        }
+
+        async function handlePostSubmit(e) {
+            e.preventDefault();
+            if (!currentUserData) return openAuthModal();
+
+            const title = document.getElementById('postTitleInput').value;
+            const content = document.getElementById('postContentInput').value;
+            const fileInput = document.getElementById('postFileInput');
+            const urlInput = document.getElementById('postUrlInput').value.trim();
+            const file = fileInput.files[0];
+
+            const progressContainer = document.getElementById('uploadProgressContainer');
+            const statusText = document.getElementById('uploadStatusText');
+            const submitBtn = document.getElementById('submitBtn');
+
+            let mediaUrl = urlInput;
+            let mediaType = '';
+
+            if (file) {
+                progressContainer.classList.remove('hidden');
+                submitBtn.disabled = true;
+                statusText.innerText = "파일 업로드 처리 중...";
+
+                try {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        mediaUrl = event.target.result;
+                        const isVideo = file.type.startsWith('video') || file.name.match(/\.(mp4|mov|avi|wmv|mkv)$/i);
+                        mediaType = isVideo ? 'video' : 'image';
+                        const postType = currentTab === 'video' || isVideo ? 'video' : 'community';
+
+                        saveToDatabase(postType, title, content, mediaUrl, mediaType);
+                    };
+                    reader.readAsDataURL(file);
+                } catch(err) {
+                    alert('업로드 실패: ' + err.message);
+                    submitBtn.disabled, submitBtn.disabled = false;
+                    progressContainer.classList.add('hidden');
+                }
+            } else {
+                if (mediaUrl) {
+                    const isVideo = mediaUrl.match(/\.(mp4|mov|avi|wmv|mkv)$/i) || currentTab === 'video';
+                    mediaType = isVideo ? 'video' : 'image';
+                }
+                saveToDatabase(currentTab === 'video' ? 'video' : 'community', title, content, mediaUrl, mediaType);
+            }
+        }
+
+        function saveToDatabase(type, title, content, mediaUrl, mediaType) {
+            db.ref('posts').push({
+                type: type,
+                title: title,
+                content: content,
+                mediaUrl: mediaUrl,
+                mediaType: mediaType,
+                author: currentUserData.name,
+                color: currentUserData.color,
+                uid: currentUserData.uid,
+                createdAt: Date.now()
+            }).then(() => {
+                closePostModal();
+                document.getElementById('postTitleInput').value = '';
+                document.getElementById('postContentInput').value = '';
+                document.getElementById('postFileInput').value = '';
+                document.getElementById('postUrlInput').value = '';
+            }).catch(err => {
+                alert('데이터 저장 실패: ' + err.message);
+            });
+        }
+
+        function deleteItem(id) {
+            if (confirm("정말 이 항목을 삭제하시겠습니까?")) {
+                db.ref('posts/' + id).remove();
+            }
         }
     </script>
-    <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
-    
-    <!-- Firebase SDK -->
-    <script src="[https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js](https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js)"></script>
-    <script src="[https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js](https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js)"></script>
-    <script src="[https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js](https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js)"></script>
-
-    <style>
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #00000022; border-radius: 3px; }
-        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #ffffff22; }
-    </style>
-</head>
-<body class="bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 min-h-screen flex flex-col font-sans transition-colors duration-200">
-
-    <!-- Auth 모달 -->
-    <div id="authModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white dark:bg-gray-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col gap-4 relative">
-            <button type="button" onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
-                <i class="fa-solid fa-xmark text-lg"></i>
-            </button>
-
-            <button type="button" onclick="handleGoogleLogin()" class="w-full py-2.5 px-4 rounded-xl border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 font-semibold text-xs flex items-center justify-center gap-2.5 transition">
-                <svg class="w-4 h-4" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                </svg>
-                <span>Google 계정으로 계속하기</span>
-            </button>
-
-            <div class="flex items-center gap-2 my-1">
-                <div class="flex-1 h-[1px] bg-gray-200 dark:bg-gray-800"></div>
-                <span class="text-[11px] text-gray-400">또는</span>
-                <div class="flex-1 h-[1px] bg-gray-200 dark:bg-gray-800"></div>
-            </div>
-
-            <div class="flex border-b border-gray-200 dark:border-gray-800">
-                <button type="button" id="tabLoginBtn" onclick="switchAuthTab('login')" class="flex-1 py-2 font-bold text-sm text-[#73B5FE] border-b-2 border-[#73B5FE]">로그인</button>
-                <button type="button" id="tabSignupBtn" onclick="switchAuthTab('signup')" class="flex-1 py-2 font-bold text-sm text-gray-400 border-b-2 border-transparent">회원가입</button>
-            </div>
-
-            <form id="loginForm" onsubmit="handleLogin(event)" class="flex flex-col gap-3 text-xs">
-                <div>
-                    <label class="block font-semibold mb-1">이메일</label>
-                    <input type="email" id="loginEmail" placeholder="example@email.com" required class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-[#73B5FE]">
-                </div>
-                <div>
-                    <label class="block font-semibold mb-1">비밀번호</label>
-                    <input type="password" id="loginPassword" placeholder="비밀번호 입력" required class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-[#73B5FE]">
-                </div>
-                <p id="loginErrorText" class="text-[11px] text-red-500 hidden"></p>
-                <button type="submit" class="w-full py-3 mt-1 rounded-xl bg-[#73B5FE] text-white font-bold text-sm hover:opacity-90 transition">로그인</button>
-            </form>
-
-            <form id="signupForm" onsubmit="handleSignup(event)" class="hidden flex flex-col gap-3 text-xs">
-                <div>
-                    <label class="block font-semibold mb-1">이메일</label>
-                    <input type="email" id="signupEmail" placeholder="example@email.com" required class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-[#73B5FE]">
-                </div>
-                <div>
-                    <label class="block font-semibold mb-1">비밀번호 (6자리 이상)</label>
-                    <input type="password" id="signupPassword" placeholder="비밀번호 입력" required minlength="6" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-[#73B5FE]">
-                </div>
-                <div>
-                    <label class="block font-semibold mb-1">닉네임</label>
-                    <input type="text" id="signupNickname" placeholder="닉네임 입력" required class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-[#73B5FE]">
-                </div>
-                <div>
-                    <label class="block font-semibold mb-2">프로필 색상</label>
-                    <div class="flex justify-between items-center px-2">
-                        <button type="button" onclick="selectColor('#E8472A', 'signup')" class="signup-color-opt w-7 h-7 rounded-full bg-[#E8472A] ring-2 ring-offset-2 ring-transparent" data-color="#E8472A"></button>
-                        <button type="button" onclick="selectColor('#FFB400', 'signup')" class="signup-color-opt w-7 h-7 rounded-full bg-[#FFB400] ring-2 ring-offset-2 ring-transparent" data-color="#FFB400"></button>
-                        <button type="button" onclick="selectColor('#FCDB00', 'signup')" class="signup-color-opt w-7 h-7 rounded-full bg-[#FCDB00] ring-2 ring-offset-2 ring-transparent" data-color="#FCDB00"></button>
-                        <button type="button" onclick="selectColor('#829D56', 'signup')" class="signup-color-opt w-7 h-7 rounded-full bg-[#829D56] ring-2 ring-offset-2 ring-transparent" data-color="#829D56"></button>
-                        <button type="button" onclick="selectColor('#73B5FE', 'signup')" class="signup-color-opt w-7 h-7 rounded-full bg-[#73B5FE] ring-2 ring-offset-2 ring-transparent" data-color="#73B5FE"></button>
-                        <button type="button" onclick="selectColor('#934F9A', 'signup')" class="signup-color-opt w-7 h-7 rounded-full bg-[#934F9A] ring-2 ring-offset-2 ring-transparent" data-color="#934F9A"></button>
-                    </div>
-                </div>
-                <p id="signupErrorText" class="text-[11px] text-red-500 hidden"></p>
-                <button type="submit" class="w-full py-3 mt-1 rounded-xl bg-[#73B5FE] text-white font-bold text-sm hover:opacity-90 transition">회원가입 완료</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- 내 프로필 관리 모달 -->
-    <div id="userProfileModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white dark:bg-gray-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col gap-4 relative">
-            <button type="button" onclick="closeProfileModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
-                <i class="fa-solid fa-xmark text-lg"></i>
-            </button>
-
-            <h2 class="text-base font-bold">내 프로필 설정 👤</h2>
-            
-            <form onsubmit="handleProfileUpdate(event)" class="flex flex-col gap-3 text-xs">
-                <div>
-                    <label class="block font-semibold mb-1 text-gray-500">이메일 계정</label>
-                    <input type="text" id="profileUserEmail" disabled class="w-full bg-gray-100 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-800 rounded-lg p-2.5 text-gray-400 cursor-not-allowed">
-                </div>
-                <div>
-                    <label class="block font-semibold mb-1">닉네임 변경</label>
-                    <input type="text" id="profileNicknameInput" required class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-[#73B5FE]">
-                </div>
-                <div>
-                    <label class="block font-semibold mb-2">프로필 색상 변경</label>
-                    <div class="flex justify-between items-center px-2">
-                        <button type="button" onclick="selectColor('#E8472A', 'profile')" class="profile-color-opt w-7 h-7 rounded-full bg-[#E8472A] ring-2 ring-offset-2 ring-transparent" data-color="#E8472A"></button>
-                        <button type="button" onclick="selectColor('#FFB400', 'profile')" class="profile-color-opt w-7 h-7 rounded-full bg-[#FFB400] ring-2 ring-offset-2 ring-transparent" data-color="#FFB400"></button>
-                        <button type="button" onclick="selectColor('#FCDB00', 'profile')" class="profile-color-opt w-7 h-7 rounded-full bg-[#FCDB00] ring-2 ring-offset-2 ring-transparent" data-color="#FCDB00"></button>
-                        <button type="button" onclick="selectColor('#829D56', 'profile')" class="profile-color-opt w-7 h-7 rounded-full bg-[#829D56] ring-2 ring-offset-2 ring-transparent" data-color="#829D56"></button>
-                        <button type="button" onclick="selectColor('#73B5FE', 'profile')" class="profile-color-opt w-7 h-7 rounded-full bg-[#73B5FE] ring-2 ring-offset-2 ring-transparent" data-color="#73B5FE"></button>
-                        <button type="button" onclick="selectColor('#934F9A', 'profile')" class="profile-color-opt w-7 h-7 rounded-full bg-[#934F9A] ring-2 ring-offset-2 ring-transparent" data-color="#934F9A"></button>
-                    </div>
-                </div>
-                <p id="profileErrorText" class="text-[11px] text-red-500 hidden"></p>
-                <button type="submit" class="w-full py-2.5 rounded-xl bg-[#73B5FE] text-white font-bold text-xs hover:opacity-90 transition mt-1">프로필 저장</button>
-            </form>
-
-            <div class="border-t border-gray-200 dark:border-gray-800 pt-3 flex flex-col gap-2">
-                <button type="button" onclick="handleLogout()" class="w-full py
+</body>
+</html>
