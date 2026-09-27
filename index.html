@@ -26,13 +26,17 @@
 </head>
 <body class="bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 min-h-screen flex flex-col font-sans transition-colors duration-200">
 
-    <!-- 프로필 설정 모달 -->
+    <!-- 프로필 설정 / 관리 모달 -->
     <div id="userProfileModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white dark:bg-gray-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col gap-5">
-            <div class="text-center">
-                <h2 class="text-xl font-bold mb-1">프로필 설정 👋</h2>
-                <p class="text-xs text-gray-500 dark:text-gray-400">사용할 닉네임과 포인트 색상을 설정하세요.</p>
+            <div class="flex justify-between items-center">
+                <h2 id="profileModalTitle" class="text-xl font-bold">프로필 설정 👋</h2>
+                <button type="button" id="closeProfileModalBtn" onclick="closeProfileModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hidden">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
             </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400 -mt-3">사용할 닉네임과 포인트 색상을 설정하세요.</p>
+            
             <div class="flex flex-col gap-4">
                 <div>
                     <label class="block text-xs font-semibold mb-1">닉네임</label>
@@ -50,7 +54,18 @@
                     </div>
                 </div>
             </div>
+
             <button id="saveProfileBtn" class="w-full py-3 rounded-xl bg-[#73B5FE] text-white font-bold text-sm hover:opacity-90 transition">저장하기</button>
+
+            <!-- 로그아웃 및 회원탈퇴 버튼 (로그인된 상태일 때만 표시) -->
+            <div id="accountActionButtons" class="hidden flex gap-2 border-t border-gray-200 dark:border-gray-800 pt-4 mt-1">
+                <button type="button" onclick="handleLogout()" class="flex-1 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-bold text-xs hover:bg-gray-200 dark:hover:bg-gray-700 transition">
+                    <i class="fa-solid fa-right-from-bracket mr-1"></i>로그아웃
+                </button>
+                <button type="button" onclick="handleDeleteAccount()" class="flex-1 py-2 rounded-lg bg-red-50 dark:bg-red-950/30 text-red-500 font-bold text-xs hover:bg-red-100 dark:hover:bg-red-900/50 transition">
+                    <i class="fa-solid fa-user-xmark mr-1"></i>탈퇴하기
+                </button>
+            </div>
         </div>
     </div>
 
@@ -69,12 +84,12 @@
             </button>
         </div>
         <div class="flex items-center gap-1 sm:gap-2">
-            <!-- 다크/라이트 모드 전환 버튼 -->
+            <!-- 다크/라이트 모드 전환 -->
             <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition" title="화면 테마 변경">
                 <i id="themeIcon" class="fa-solid fa-moon"></i>
             </button>
-            <!-- 프로필 수정 버튼 (클릭 가능) -->
-            <button onclick="openProfileModal()" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-xs font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition" title="프로필 수정">
+            <!-- 프로필 수정 및 계정관리 버튼 -->
+            <button onclick="openProfileModal()" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-xs font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition" title="프로필 설정 및 계정 관리">
                 <div id="userAvatarDot" class="w-3.5 h-3.5 rounded-full bg-[#73B5FE]"></div>
                 <span id="headerUserName" class="max-w-[60px] sm:max-w-none truncate">익명</span>
             </button>
@@ -159,7 +174,7 @@
             listenRealtimeData();
         });
 
-        // 테마 설정 (블랙 / 화이트)
+        // 테마 설정
         function initTheme() {
             const savedTheme = localStorage.getItem('pixel_theme');
             if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -177,22 +192,41 @@
             document.getElementById('themeIcon').className = isDark ? 'fa-solid fa-sun text-yellow-400' : 'fa-solid fa-moon';
         }
 
-        // 프로필 설정
+        // 프로필 관리 및 자동 로그인
         function initUserProfile() {
             if (!currentUser) {
-                openProfileModal();
+                openProfileModal(true); // 첫 접속 시 강제 모달
             } else {
                 selectedColor = currentUser.color || '#73B5FE';
                 updateProfileUI();
             }
         }
 
-        function openProfileModal() {
-            if (currentUser) {
+        function openProfileModal(isFirstTime = false) {
+            const closeBtn = document.getElementById('closeProfileModalBtn');
+            const actionBtns = document.getElementById('accountActionButtons');
+            const title = document.getElementById('profileModalTitle');
+
+            if (currentUser && !isFirstTime) {
                 document.getElementById('initNicknameInput').value = currentUser.name || '';
                 selectColor(currentUser.color || '#73B5FE');
+                closeBtn.classList.remove('hidden');
+                actionBtns.classList.remove('hidden');
+                title.innerText = "프로필 수정 및 계정 관리 ⚙️";
+            } else {
+                document.getElementById('initNicknameInput').value = '';
+                selectColor('#73B5FE');
+                closeBtn.classList.add('hidden');
+                actionBtns.classList.add('hidden');
+                title.innerText = "프로필 설정 👋";
             }
             document.getElementById('userProfileModal').classList.remove('hidden');
+        }
+
+        function closeProfileModal() {
+            if (currentUser) {
+                document.getElementById('userProfileModal').classList.add('hidden');
+            }
         }
 
         function selectColor(color) { 
@@ -215,9 +249,33 @@
         });
 
         function updateProfileUI() {
-            if (!currentUser) return;
+            if (!currentUser) {
+                document.getElementById('headerUserName').innerText = "로그인 필요";
+                document.getElementById('userAvatarDot').style.backgroundColor = "#ccc";
+                return;
+            }
             document.getElementById('headerUserName').innerText = currentUser.name;
             document.getElementById('userAvatarDot').style.backgroundColor = currentUser.color;
+        }
+
+        // 로그아웃
+        function handleLogout() {
+            if (confirm("로그아웃 하시겠습니까?")) {
+                localStorage.removeItem('pixel_user');
+                currentUser = null;
+                updateProfileUI();
+                openProfileModal(true);
+            }
+        }
+
+        // 회원탈퇴 (내용 유지, 사용자 정보 삭제)
+        function handleDeleteAccount() {
+            if (confirm("정말 탈퇴하시겠습니까?\n작성한 게시글은 지워지지 않고 사용자 정보만 삭제됩니다.")) {
+                localStorage.removeItem('pixel_user');
+                currentUser = null;
+                updateProfileUI();
+                openProfileModal(true);
+            }
         }
 
         function listenRealtimeData() {
@@ -320,7 +378,11 @@
             }
         }
 
-        function openPostModal() { document.getElementById('postModal').classList.remove('hidden'); }
+        function openPostModal() { 
+            if (!currentUser) return openProfileModal(true);
+            document.getElementById('postModal').classList.remove('hidden'); 
+        }
+
         function closePostModal() { 
             document.getElementById('postModal').classList.add('hidden'); 
             document.getElementById('uploadProgressContainer').classList.add('hidden');
@@ -329,7 +391,7 @@
 
         async function handlePostSubmit(e) {
             e.preventDefault();
-            if (!currentUser) return alert("프로필 설정을 진행해주세요.");
+            if (!currentUser) return openProfileModal(true);
 
             const title = document.getElementById('postTitleInput').value;
             const content = document.getElementById('postContentInput').value;
