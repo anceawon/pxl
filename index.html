@@ -13,8 +13,9 @@
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Firebase Realtime Database SDK -->
+    <!-- Firebase SDK (App, Auth, Database) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <style>
@@ -26,88 +27,145 @@
 </head>
 <body class="bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 min-h-screen flex flex-col font-sans transition-colors duration-200">
 
-    <!-- 프로필 설정 / 관리 모달 -->
-    <div id="userProfileModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white dark:bg-gray-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col gap-5">
-            <div class="flex justify-between items-center">
-                <h2 id="profileModalTitle" class="text-xl font-bold">프로필 설정 👋</h2>
-                <button type="button" id="closeProfileModalBtn" onclick="closeProfileModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hidden">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
+    <!-- Auth 모달 (로그인 / 회원가입) -->
+    <div id="authModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-gray-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col gap-4 relative">
+            <button type="button" onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <!-- Google 로그인 버튼 -->
+            <button type="button" onclick="handleGoogleLogin()" class="w-full py-2.5 px-4 rounded-xl border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 font-semibold text-xs flex items-center justify-center gap-2.5 transition">
+                <svg class="w-4 h-4" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                </svg>
+                <span>Google 계정으로 계속하기</span>
+            </button>
+
+            <div class="flex items-center gap-2 my-1">
+                <div class="flex-1 h-[1px] bg-gray-200 dark:bg-gray-800"></div>
+                <span class="text-[11px] text-gray-400">또는</span>
+                <div class="flex-1 h-[1px] bg-gray-200 dark:bg-gray-800"></div>
             </div>
-            <p class="text-xs text-gray-500 dark:text-gray-400 -mt-3">사용할 닉네임과 포인트 색상을 설정하세요.</p>
-            
-            <div class="flex flex-col gap-4">
+
+            <!-- 탭 (로그인 / 회원가입) -->
+            <div class="flex border-b border-gray-200 dark:border-gray-800">
+                <button type="button" id="tabLoginBtn" onclick="switchAuthTab('login')" class="flex-1 py-2 font-bold text-sm text-[#73B5FE] border-b-2 border-[#73B5FE]">로그인</button>
+                <button type="button" id="tabSignupBtn" onclick="switchAuthTab('signup')" class="flex-1 py-2 font-bold text-sm text-gray-400 border-b-2 border-transparent">회원가입</button>
+            </div>
+
+            <!-- 로그인 폼 -->
+            <form id="loginForm" onsubmit="handleLogin(event)" class="flex flex-col gap-3 text-xs">
                 <div>
-                    <label class="block text-xs font-semibold mb-1">닉네임</label>
-                    <input type="text" id="initNicknameInput" placeholder="닉네임을 입력하세요" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#73B5FE]">
-                    <p id="nicknameNoticeText" class="text-[11px] text-red-500 mt-1 hidden"></p>
+                    <label class="block font-semibold mb-1">이메일</label>
+                    <input type="email" id="loginEmail" placeholder="example@email.com" required class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-[#73B5FE]">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold mb-2">프로필 색상</label>
+                    <label class="block font-semibold mb-1">비밀번호</label>
+                    <input type="password" id="loginPassword" placeholder="비밀번호 입력" required class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-[#73B5FE]">
+                </div>
+                <p id="loginErrorText" class="text-[11px] text-red-500 hidden"></p>
+                <button type="submit" class="w-full py-3 mt-1 rounded-xl bg-[#73B5FE] text-white font-bold text-sm hover:opacity-90 transition">로그인</button>
+            </form>
+
+            <!-- 회원가입 폼 -->
+            <form id="signupForm" onsubmit="handleSignup(event)" class="hidden flex flex-col gap-3 text-xs">
+                <div>
+                    <label class="block font-semibold mb-1">이메일</label>
+                    <input type="email" id="signupEmail" placeholder="example@email.com" required class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-[#73B5FE]">
+                </div>
+                <div>
+                    <label class="block font-semibold mb-1">비밀번호 (6자리 이상)</label>
+                    <input type="password" id="signupPassword" placeholder="비밀번호 입력" required minlength="6" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-[#73B5FE]">
+                </div>
+                <div>
+                    <label class="block font-semibold mb-1">닉네임</label>
+                    <input type="text" id="signupNickname" placeholder="닉네임 입력" required class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-[#73B5FE]">
+                </div>
+                <div>
+                    <label class="block font-semibold mb-2">프로필 색상</label>
                     <div class="flex justify-between items-center px-2">
-                        <button type="button" onclick="selectColor('#E8472A')" class="color-opt w-8 h-8 rounded-full bg-[#E8472A] ring-2 ring-offset-2 ring-transparent" data-color="#E8472A"></button>
-                        <button type="button" onclick="selectColor('#FFB400')" class="color-opt w-8 h-8 rounded-full bg-[#FFB400] ring-2 ring-offset-2 ring-transparent" data-color="#FFB400"></button>
-                        <button type="button" onclick="selectColor('#FCDB00')" class="color-opt w-8 h-8 rounded-full bg-[#FCDB00] ring-2 ring-offset-2 ring-transparent" data-color="#FCDB00"></button>
-                        <button type="button" onclick="selectColor('#829D56')" class="color-opt w-8 h-8 rounded-full bg-[#829D56] ring-2 ring-offset-2 ring-transparent" data-color="#829D56"></button>
-                        <button type="button" onclick="selectColor('#73B5FE')" class="color-opt w-8 h-8 rounded-full bg-[#73B5FE] ring-2 ring-offset-2 ring-transparent" data-color="#73B5FE"></button>
-                        <button type="button" onclick="selectColor('#934F9A')" class="color-opt w-8 h-8 rounded-full bg-[#934F9A] ring-2 ring-offset-2 ring-transparent" data-color="#934F9A"></button>
+                        <button type="button" onclick="selectColor('#E8472A')" class="color-opt w-7 h-7 rounded-full bg-[#E8472A] ring-2 ring-offset-2 ring-transparent" data-color="#E8472A"></button>
+                        <button type="button" onclick="selectColor('#FFB400')" class="color-opt w-7 h-7 rounded-full bg-[#FFB400] ring-2 ring-offset-2 ring-transparent" data-color="#FFB400"></button>
+                        <button type="button" onclick="selectColor('#FCDB00')" class="color-opt w-7 h-7 rounded-full bg-[#FCDB00] ring-2 ring-offset-2 ring-transparent" data-color="#FCDB00"></button>
+                        <button type="button" onclick="selectColor('#829D56')" class="color-opt w-7 h-7 rounded-full bg-[#829D56] ring-2 ring-offset-2 ring-transparent" data-color="#829D56"></button>
+                        <button type="button" onclick="selectColor('#73B5FE')" class="color-opt w-7 h-7 rounded-full bg-[#73B5FE] ring-2 ring-offset-2 ring-transparent" data-color="#73B5FE"></button>
+                        <button type="button" onclick="selectColor('#934F9A')" class="color-opt w-7 h-7 rounded-full bg-[#934F9A] ring-2 ring-offset-2 ring-transparent" data-color="#934F9A"></button>
                     </div>
                 </div>
-            </div>
-
-            <button id="saveProfileBtn" class="w-full py-3 rounded-xl bg-[#73B5FE] text-white font-bold text-sm hover:opacity-90 transition">저장하기</button>
-
-            <!-- 로그아웃 및 회원탈퇴 버튼 (로그인된 상태일 때만 표시) -->
-            <div id="accountActionButtons" class="hidden flex gap-2 border-t border-gray-200 dark:border-gray-800 pt-4 mt-1">
-                <button type="button" onclick="handleLogout()" class="flex-1 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-bold text-xs hover:bg-gray-200 dark:hover:bg-gray-700 transition">
-                    <i class="fa-solid fa-right-from-bracket mr-1"></i>로그아웃
-                </button>
-                <button type="button" onclick="handleDeleteAccount()" class="flex-1 py-2 rounded-lg bg-red-50 dark:bg-red-950/30 text-red-500 font-bold text-xs hover:bg-red-100 dark:hover:bg-red-900/50 transition">
-                    <i class="fa-solid fa-user-xmark mr-1"></i>탈퇴하기
-                </button>
-            </div>
+                <p id="signupErrorText" class="text-[11px] text-red-500 hidden"></p>
+                <button type="submit" class="w-full py-3 mt-1 rounded-xl bg-[#73B5FE] text-white font-bold text-sm hover:opacity-90 transition">회원가입 완료</button>
+            </form>
         </div>
     </div>
 
-    <!-- 헤더 -->
-    <header class="sticky top-0 z-40 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 px-3 py-2.5 flex items-center justify-between gap-1">
-        <button onclick="goHome()" class="flex items-center gap-1.5 text-base sm:text-lg font-extrabold tracking-tight">
+    <!-- 내 프로필 관리 / 로그아웃 모달 -->
+    <div id="userProfileModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-gray-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col gap-4 relative">
+            <button type="button" onclick="closeProfileModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <h2 class="text-lg font-bold">내 계정 정보 👤</h2>
+            <div class="flex flex-col gap-2 text-xs border-y border-gray-200 dark:border-gray-800 py-3">
+                <p><span class="font-semibold text-gray-500">이메일:</span> <span id="profileUserEmail">-</span></p>
+                <p><span class="font-semibold text-gray-500">닉네임:</span> <span id="profileUserName">-</span></p>
+            </div>
+
+            <button type="button" onclick="handleLogout()" class="w-full py-2.5 rounded-xl bg-red-50 dark:bg-red-950/30 text-red-500 font-bold text-xs hover:bg-red-100 dark:hover:bg-red-900/50 transition flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-right-from-bracket"></i> 로그아웃
+            </button>
+        </div>
+    </div>
+
+    <!-- 헤더 영역 -->
+    <header class="sticky top-0 z-40 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center justify-between gap-2">
+        <button onclick="goHome()" class="flex items-center gap-2 text-lg font-extrabold tracking-tight">
             <i class="fa-solid fa-cloud text-xl text-[#73B5FE]"></i>
-            <span class="hidden sm:inline">PixelHub</span>
+            <span>PixelHub</span>
         </button>
+
         <div class="flex items-center bg-gray-100 dark:bg-gray-800 p-1 rounded-full text-xs font-semibold">
-            <button id="tabVideoBtn" onclick="switchTab('video')" class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white transition">
+            <button id="tabVideoBtn" onclick="switchTab('video')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white transition">
                 <i class="fa-solid fa-film text-[#73B5FE]"></i><span>동영상</span>
             </button>
-            <button id="tabCommunityBtn" onclick="switchTab('community')" class="flex items-center gap-1 px-2.5 py-1 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition">
+            <button id="tabCommunityBtn" onclick="switchTab('community')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition">
                 <i class="fa-solid fa-comments"></i><span>커뮤니티</span>
             </button>
         </div>
-        <div class="flex items-center gap-1 sm:gap-2">
-            <!-- 다크/라이트 모드 전환 -->
+
+        <div class="flex items-center gap-2">
             <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition" title="화면 테마 변경">
                 <i id="themeIcon" class="fa-solid fa-moon"></i>
             </button>
-            <!-- 프로필 수정 및 계정관리 버튼 -->
-            <button onclick="openProfileModal()" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-xs font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition" title="프로필 설정 및 계정 관리">
-                <div id="userAvatarDot" class="w-3.5 h-3.5 rounded-full bg-[#73B5FE]"></div>
-                <span id="headerUserName" class="max-w-[60px] sm:max-w-none truncate">익명</span>
+
+            <!-- 로그인 안 되었을 때 버튼 -->
+            <button id="guestAuthBtn" onclick="openAuthModal()" class="px-3 py-1.5 rounded-full bg-[#73B5FE] text-white text-xs font-bold hover:opacity-90 transition">
+                로그인 / 회원가입
             </button>
-            <!-- 관리자 버튼 -->
+
+            <!-- 로그인 되었을 때 프로필 버튼 -->
+            <button id="userAuthBtn" onclick="openProfileModal()" class="hidden flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-xs font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition">
+                <div id="userAvatarDot" class="w-3.5 h-3.5 rounded-full bg-[#73B5FE]"></div>
+                <span id="headerUserName">유저</span>
+            </button>
+
             <button onclick="switchTab('admin')" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 transition" title="관리자">
                 <i class="fa-solid fa-user-shield"></i>
             </button>
         </div>
     </header>
 
-    <!-- 메인 컨텐츠 -->
-    <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 flex flex-col gap-4 sm:gap-5">
+    <!-- 메인 컨텐츠 영역 -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col gap-5">
         <section id="filterSection" class="flex flex-col gap-3">
             <div class="flex gap-2">
-                <input type="text" id="searchInput" oninput="renderMainView()" placeholder="검색어 입력..." class="flex-1 bg-gray-100 dark:bg-gray-800 text-xs sm:text-sm border border-gray-200 dark:border-gray-700 rounded-xl py-2.5 px-3.5 focus:outline-none">
-                <button onclick="openPostModal()" class="bg-[#73B5FE] text-white px-3.5 py-2.5 rounded-xl font-bold text-xs hover:opacity-90 flex items-center gap-1 whitespace-nowrap">
-                    <i class="fa-solid fa-plus"></i> <span>글 등록하기</span>
+                <input type="text" id="searchInput" oninput="renderMainView()" placeholder="검색어를 입력하세요..." class="flex-1 bg-gray-100 dark:bg-gray-800 text-xs sm:text-sm border border-gray-200 dark:border-gray-700 rounded-xl py-2.5 px-3.5 focus:outline-none">
+                <button onclick="openPostModal()" class="bg-[#73B5FE] text-white px-4 py-2.5 rounded-xl font-bold text-xs hover:opacity-90 flex items-center gap-1.5 whitespace-nowrap">
+                    <i class="fa-solid fa-plus"></i> <span>글 작성하기</span>
                 </button>
             </div>
         </section>
@@ -123,25 +181,25 @@
     <!-- 업로드 모달 -->
     <div id="postModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white dark:bg-gray-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col gap-4">
-            <h2 class="text-base font-bold">게시물 업로드</h2>
+            <h2 class="text-base font-bold">게시물 작성</h2>
             <form onsubmit="handlePostSubmit(event)" class="flex flex-col gap-3 text-xs">
                 <input type="text" id="postTitleInput" placeholder="제목" required class="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 p-2.5 rounded-lg">
-                <textarea id="postContentInput" placeholder="설명 또는 글 내용 입력..." class="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 p-2.5 rounded-lg rows-3"></textarea>
+                <textarea id="postContentInput" placeholder="설명 또는 글 내용을 입력하세요..." class="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 p-2.5 rounded-lg rows-3"></textarea>
                 
                 <div class="flex flex-col gap-1">
-                    <label class="font-semibold text-gray-700 dark:text-gray-300">사진 또는 동영상 첨부 (또는 미디어 URL 링크)</label>
+                    <label class="font-semibold text-gray-700 dark:text-gray-300">사진 또는 동영상 첨부 (또는 URL 링크)</label>
                     <input type="file" id="postFileInput" accept="image/*,video/*" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 p-2 rounded-lg text-xs">
-                    <input type="url" id="postUrlInput" placeholder="또는 이미지/동영상 URL 링크 직접 입력" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 p-2 rounded-lg text-xs mt-1">
+                    <input type="url" id="postUrlInput" placeholder="또는 미디어 URL 링크 직접 입력" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 p-2 rounded-lg text-xs mt-1">
                 </div>
 
                 <div id="uploadProgressContainer" class="hidden flex flex-col gap-1">
                     <div class="flex justify-between text-[11px] text-gray-500 font-bold">
-                        <span id="uploadStatusText">업로드 중...</span>
+                        <span id="uploadStatusText">업로드 처리 중...</span>
                     </div>
                 </div>
 
                 <div class="flex justify-end gap-2 mt-2">
-                    <button type="button" onclick="closePostModal()" class="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-800">취소</button>
+                    <button type="button" onclick="closePostModal()" class="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-800 font-medium">취소</button>
                     <button type="submit" id="submitBtn" class="px-4 py-2 rounded-lg bg-[#73B5FE] text-white font-bold">게시하기</button>
                 </div>
             </form>
@@ -160,15 +218,15 @@
         };
 
         firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
         const db = firebase.database();
 
-        // 사용 금지 닉네임 단어 목록
         const BANNED_NICKNAMES = [
             "라더", "덕개", "각별", "공룡", "잠뜰", "수현",
             "sleepground", "rather", "duckgae", "rockggun", "hsrd", "heptagram", "ehdgh141", "dino", "suhyen"
         ];
 
-        let currentUser = JSON.parse(localStorage.getItem('pixel_user')) || null;
+        let currentUserData = null;
         let currentTab = 'video';
         let selectedColor = '#73B5FE';
 
@@ -177,11 +235,11 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             initTheme();
-            initUserProfile();
+            listenAuthState();
             listenRealtimeData();
+            selectColor('#73B5FE');
         });
 
-        // 테마 설정
         function initTheme() {
             const savedTheme = localStorage.getItem('pixel_theme');
             if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -199,49 +257,71 @@
             document.getElementById('themeIcon').className = isDark ? 'fa-solid fa-sun text-yellow-400' : 'fa-solid fa-moon';
         }
 
-        // 프로필 관리 및 자동 로그인
-        function initUserProfile() {
-            if (!currentUser) {
-                openProfileModal(true);
+        function listenAuthState() {
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    const snap = await db.ref('users/' + user.uid).once('value');
+                    let val = snap.val();
+
+                    if (!val) {
+                        const name = user.displayName || user.email.split('@')[0];
+                        val = { name: name, color: '#73B5FE', email: user.email };
+                        await db.ref('users/' + user.uid).set(val);
+                    }
+
+                    currentUserData = {
+                        uid: user.uid,
+                        email: user.email,
+                        name: val.name,
+                        color: val.color || '#73B5FE'
+                    };
+                    document.getElementById('guestAuthBtn').classList.add('hidden');
+                    document.getElementById('userAuthBtn').classList.remove('hidden');
+                    document.getElementById('headerUserName').innerText = currentUserData.name;
+                    document.getElementById('userAvatarDot').style.backgroundColor = currentUserData.color;
+                } else {
+                    currentUserData = null;
+                    document.getElementById('guestAuthBtn').classList.remove('hidden');
+                    document.getElementById('userAuthBtn').classList.add('hidden');
+                }
+            });
+        }
+
+        function openAuthModal() {
+            document.getElementById('authModal').classList.remove('hidden');
+            switchAuthTab('login');
+        }
+
+        function closeAuthModal() {
+            document.getElementById('authModal').classList.add('hidden');
+        }
+
+        function switchAuthTab(tab) {
+            const loginForm = document.getElementById('loginForm');
+            const signupForm = document.getElementById('signupForm');
+            const tabLoginBtn = document.getElementById('tabLoginBtn');
+            const tabSignupBtn = document.getElementById('tabSignupBtn');
+
+            document.getElementById('loginErrorText').classList.add('hidden');
+            document.getElementById('signupErrorText').classList.add('hidden');
+
+            if (tab === 'login') {
+                loginForm.classList.remove('hidden');
+                signupForm.classList.add('hidden');
+                tabLoginBtn.className = "flex-1 py-2 font-bold text-sm text-[#73B5FE] border-b-2 border-[#73B5FE]";
+                tabSignupBtn.className = "flex-1 py-2 font-bold text-sm text-gray-400 border-b-2 border-transparent";
             } else {
-                selectedColor = currentUser.color || '#73B5FE';
-                updateProfileUI();
+                loginForm.classList.add('hidden');
+                signupForm.classList.remove('hidden');
+                tabSignupBtn.className = "flex-1 py-2 font-bold text-sm text-[#73B5FE] border-b-2 border-[#73B5FE]";
+                tabLoginBtn.className = "flex-1 py-2 font-bold text-sm text-gray-400 border-b-2 border-transparent";
             }
         }
 
-        function openProfileModal(isFirstTime = false) {
-            const closeBtn = document.getElementById('closeProfileModalBtn');
-            const actionBtns = document.getElementById('accountActionButtons');
-            const title = document.getElementById('profileModalTitle');
-            const noticeText = document.getElementById('nicknameNoticeText');
-            noticeText.classList.add('hidden');
-
-            if (currentUser && !isFirstTime) {
-                document.getElementById('initNicknameInput').value = currentUser.name || '';
-                selectColor(currentUser.color || '#73B5FE');
-                closeBtn.classList.remove('hidden');
-                actionBtns.classList.remove('hidden');
-                title.innerText = "프로필 수정 및 계정 관리 ⚙️";
-            } else {
-                document.getElementById('initNicknameInput').value = '';
-                selectColor('#73B5FE');
-                closeBtn.classList.add('hidden');
-                actionBtns.classList.add('hidden');
-                title.innerText = "프로필 설정 👋";
-            }
-            document.getElementById('userProfileModal').classList.remove('hidden');
-        }
-
-        function closeProfileModal() {
-            if (currentUser) {
-                document.getElementById('userProfileModal').classList.add('hidden');
-            }
-        }
-
-        function selectColor(color) { 
+        function selectColor(color) {
             selectedColor = color;
             document.querySelectorAll('.color-opt').forEach(btn => {
-                if(btn.dataset.color === color) {
+                if (btn.dataset.color === color) {
                     btn.classList.add('ring-gray-400', 'dark:ring-white');
                 } else {
                     btn.classList.remove('ring-gray-400', 'dark:ring-white');
@@ -249,87 +329,91 @@
             });
         }
 
-        // 닉네임 검증 및 저장
-        document.getElementById('saveProfileBtn').addEventListener('click', async () => {
-            const nickInput = document.getElementById('initNicknameInput').value.trim();
-            const noticeText = document.getElementById('nicknameNoticeText');
-            noticeText.classList.add('hidden');
+        async function handleGoogleLogin() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            try {
+                await auth.signInWithPopup(provider);
+                closeAuthModal();
+            } catch (err) {
+                alert('Google 로그인 오류: ' + err.message);
+            }
+        }
 
-            if (!nickInput) {
-                noticeText.innerText = "닉네임을 입력해주세요.";
-                noticeText.classList.remove('hidden');
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const pw = document.getElementById('loginPassword').value;
+            const errorText = document.getElementById('loginErrorText');
+            errorText.classList.add('hidden');
+
+            try {
+                await auth.signInWithEmailAndPassword(email, pw);
+                closeAuthModal();
+            } catch (err) {
+                errorText.innerText = "이메일 또는 비밀번호가 잘못되었습니다.";
+                errorText.classList.remove('hidden');
+            }
+        }
+
+        async function handleSignup(e) {
+            e.preventDefault();
+            const email = document.getElementById('signupEmail').value;
+            const pw = document.getElementById('signupPassword').value;
+            const nickname = document.getElementById('signupNickname').value.trim();
+            const errorText = document.getElementById('signupErrorText');
+            errorText.classList.add('hidden');
+
+            const lowerNick = nickname.toLowerCase();
+            if (BANNED_NICKNAMES.some(banned => lowerNick.includes(banned))) {
+                errorText.innerText = "사용할 수 없는 닉네임입니다.";
+                errorText.classList.remove('hidden');
                 return;
             }
 
-            // 1. 금지 단어 포함 여부 확인 (대소문자 무관)
-            const lowerInput = nickInput.toLowerCase();
-            const isBanned = BANNED_NICKNAMES.some(banned => lowerInput.includes(banned));
-            
-            if (isBanned) {
-                noticeText.innerText = "사용할 수 없는 닉네임입니다.";
-                noticeText.classList.remove('hidden');
-                return;
+            const usersSnap = await db.ref('users').once('value');
+            const users = usersSnap.val();
+            if (users) {
+                const isDup = Object.values(users).some(u => u.name && u.name.toLowerCase() === lowerNick);
+                if (isDup) {
+                    errorText.innerText = "이미 사용 중인 닉네임입니다.";
+                    errorText.classList.remove('hidden');
+                    return;
+                }
             }
 
-            // 2. 본인의 기존 닉네임과 동일한 경우 바로 저장
-            if (currentUser && currentUser.name === nickInput) {
-                currentUser.color = selectedColor;
-                localStorage.setItem('pixel_user', JSON.stringify(currentUser));
-                document.getElementById('userProfileModal').classList.add('hidden');
-                updateProfileUI();
-                return;
+            try {
+                const res = await auth.createUserWithEmailAndPassword(email, pw);
+                await db.ref('users/' + res.user.uid).set({
+                    name: nickname,
+                    color: selectedColor,
+                    email: email
+                });
+                closeAuthModal();
+            } catch (err) {
+                if (err.code === 'auth/email-already-in-use') {
+                    errorText.innerText = "이미 가입되어 있는 이메일입니다.";
+                } else {
+                    errorText.innerText = err.message;
+                }
+                errorText.classList.remove('hidden');
             }
+        }
 
-            // 3. 실시간 DB 중복 확인
-            const isDuplicate = await checkNicknameExists(nickInput);
-            if (isDuplicate) {
-                noticeText.innerText = "이미 사용 중인 닉네임입니다. 다른 닉네임을 사용해주세요.";
-                noticeText.classList.remove('hidden');
-                return;
-            }
+        function openProfileModal() {
+            if (!currentUserData) return openAuthModal();
+            document.getElementById('profileUserEmail').innerText = currentUserData.email;
+            document.getElementById('profileUserName').innerText = currentUserData.name;
+            document.getElementById('userProfileModal').classList.remove('hidden');
+        }
 
-            currentUser = { name: nickInput, color: selectedColor };
-            localStorage.setItem('pixel_user', JSON.stringify(currentUser));
+        function closeProfileModal() {
             document.getElementById('userProfileModal').classList.add('hidden');
-            updateProfileUI();
-        });
-
-        async function checkNicknameExists(nickname) {
-            const snapshot = await db.ref('posts').once('value');
-            const data = snapshot.val();
-            if (!data) return false;
-
-            return Object.values(data).some(post => post.author && post.author.toLowerCase() === nickname.toLowerCase());
         }
 
-        function updateProfileUI() {
-            if (!currentUser) {
-                document.getElementById('headerUserName').innerText = "로그인 필요";
-                document.getElementById('userAvatarDot').style.backgroundColor = "#ccc";
-                return;
-            }
-            document.getElementById('headerUserName').innerText = currentUser.name;
-            document.getElementById('userAvatarDot').style.backgroundColor = currentUser.color;
-        }
-
-        // 로그아웃
         function handleLogout() {
-            if (confirm("로그아웃 하시겠습니까?")) {
-                localStorage.removeItem('pixel_user');
-                currentUser = null;
-                updateProfileUI();
-                openProfileModal(true);
-            }
-        }
-
-        // 회원탈퇴
-        function handleDeleteAccount() {
-            if (confirm("정말 탈퇴하시겠습니까?\n작성한 게시글은 지워지지 않고 사용자 정보만 삭제됩니다.")) {
-                localStorage.removeItem('pixel_user');
-                currentUser = null;
-                updateProfileUI();
-                openProfileModal(true);
-            }
+            auth.signOut().then(() => {
+                closeProfileModal();
+            });
         }
 
         function listenRealtimeData() {
@@ -360,11 +444,11 @@
             const cBtn = document.getElementById('tabCommunityBtn');
             
             if (tab === 'video') {
-                vBtn.className = "flex items-center gap-1 px-2.5 py-1 rounded-full bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white transition";
-                cBtn.className = "flex items-center gap-1 px-2.5 py-1 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition";
+                vBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white transition";
+                cBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition";
             } else if (tab === 'community') {
-                cBtn.className = "flex items-center gap-1 px-2.5 py-1 rounded-full bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white transition";
-                vBtn.className = "flex items-center gap-1 px-2.5 py-1 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition";
+                cBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white transition";
+                vBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition";
             }
             
             renderMainView();
@@ -433,7 +517,7 @@
         }
 
         function openPostModal() { 
-            if (!currentUser) return openProfileModal(true);
+            if (!currentUserData) return openAuthModal();
             document.getElementById('postModal').classList.remove('hidden'); 
         }
 
@@ -445,7 +529,7 @@
 
         async function handlePostSubmit(e) {
             e.preventDefault();
-            if (!currentUser) return openProfileModal(true);
+            if (!currentUserData) return openAuthModal();
 
             const title = document.getElementById('postTitleInput').value;
             const content = document.getElementById('postContentInput').value;
@@ -497,8 +581,9 @@
                 content: content,
                 mediaUrl: mediaUrl,
                 mediaType: mediaType,
-                author: currentUser.name,
-                color: currentUser.color,
+                author: currentUserData.name,
+                color: currentUserData.color,
+                uid: currentUserData.uid,
                 createdAt: Date.now()
             }).then(() => {
                 closePostModal();
