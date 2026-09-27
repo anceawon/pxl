@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="ko" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixelHub</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: '#73B5FE',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome (아이콘) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #00000022; border-radius: 3px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #ffffff22; }
+        .text-ellipse-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    </style>
+</head>
+<body class="bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 min-h-screen flex flex-col font-sans transition-colors duration-200">
+
+    <!-- 1. 최초 및 프로필 수정 모달 -->
+    <div id="userProfileModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-gray-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col gap-5">
+            <div class="text-center">
+                <h2 id="profileModalTitle" class="text-xl font-bold mb-1">프로필 설정 👋</h2>
+                <p class="text-xs text-gray-500 dark:text-gray-400">닉네임, 프로필 이미지, 포인트를 설정해주세요.</p>
+            </div>
+
+            <div class="flex flex-col gap-4">
+                <div>
+                    <label class="block text-xs font-semibold mb-1">닉네임</label>
+                    <input type="text" id="initNicknameInput" placeholder="닉네임을 입력하세요" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#73B5FE]">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold mb-1">프로필 사진 업로드 (선택)</label>
+                    <input type="file" id="profileImageInput" accept="image/*" class="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 dark:file:bg-gray-800 dark:file:text-gray-300">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold mb-2">프로필 포인트 색상 (이미지 없을 시 적용)</label>
+                    <div class="flex justify-between items-center px-2">
+                        <button type="button" onclick="selectColor('#E8472A')" class="color-opt w-8 h-8 rounded-full bg-[#E8472A] ring-2 ring-offset-2 ring-transparent transition transform hover:scale-110" data-color="#E8472A"></button>
+                        <button type="button" onclick="selectColor('#FFB400')" class="color-opt w-8 h-8 rounded-full bg-[#FFB400] ring-2 ring-offset-2 ring-transparent transition transform hover:scale-110" data-color="#FFB400"></button>
+                        <button type="button" onclick="selectColor('#FCDB00')" class="color-opt w-8 h-8 rounded-full bg-[#FCDB00] ring-2 ring-offset-2 ring-transparent transition transform hover:scale-110" data-color="#FCDB00"></button>
+                        <button type="button" onclick="selectColor('#829D56')" class="color-opt w-8 h-8 rounded-full bg-[#829D56] ring-2 ring-offset-2 ring-transparent transition transform hover:scale-110" data-color="#829D56"></button>
+                        <button type="button" onclick="selectColor('#73B5FE')" class="color-opt w-8 h-8 rounded-full bg-[#73B5FE] ring-2 ring-offset-2 ring-transparent transition transform hover:scale-110" data-color="#73B5FE"></button>
+                        <button type="button" onclick="selectColor('#934F9A')" class="color-opt w-8 h-8 rounded-full bg-[#934F9A] ring-2 ring-offset-2 ring-transparent transition transform hover:scale-110" data-color="#934F9A"></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <button type="button" id="cancelProfileBtn" onclick="closeProfileModal()" class="hidden w-1/3 py-3 rounded-xl bg-gray-200 dark:bg-gray-800 font-bold text-sm transition">취소</button>
+                <button id="saveProfileBtn" class="flex-1 py-3 rounded-xl bg-[#73B5FE] text-white font-bold text-sm hover:opacity-90 transition">
+                    저장하기
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 헤더 -->
+    <header class="sticky top-0 z-40 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 px-4 py-2.5 flex items-center justify-between gap-2">
+        <div class="flex items-center gap-3">
+            <button onclick="goHome()" class="flex items-center gap-2 text-lg font-extrabold tracking-tight focus:outline-none">
+                <i class="fa-solid fa-cloud text-2xl text-[#73B5FE]"></i>
+                <span class="hidden sm:inline">PixelHub</span>
+            </button>
+        </div>
+
+        <!-- 메인 탭 선택 -->
+        <div class="flex items-center bg-gray-100 dark:bg-gray-800 p-1 rounded-full text-xs font-semibold">
+            <button id="tabVideoBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white transition">
+                <i class="fa-solid fa-film text-[#73B5FE]"></i>
+                <span>동영상</span>
+            </button>
+            <button id="tabCommunityBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition">
+                <i class="fa-solid fa-comments"></i>
+                <span>커뮤니티</span>
+            </button>
+        </div>
+
+        <!-- 우측 컨트롤 아이콘들 -->
+        <div class="flex items-center gap-2">
+            <button id="themeToggleBtn" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition" title="테마 전환">
+                <i class="fa-solid fa-sun text-lg dark:hidden text-[#73B5FE]"></i>
+                <i class="fa-solid fa-moon text-lg hidden dark:block text-[#73B5FE]"></i>
+            </button>
+
+            <!-- 내 채널 이동 프로필 버튼 -->
+            <button onclick="openMyChannel()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-xs font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition">
+                <div id="userAvatarDot" class="w-4 h-4 rounded-full bg-[#73B5FE] overflow-hidden flex items-center justify-center"></div>
+                <span id="headerUserName" class="hidden sm:inline">익명</span>
+            </button>
+
+            <button onclick="switchTab('admin')" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 transition" title="관리자 모드">
+                <i class="fa-solid fa-user-shield"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- 메인 컨텐츠 영역 -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col gap-5">
+
+        <!-- 검색 및 멤버 필터 -->
+        <section id="filterSection" class="flex flex-col gap-3">
+            <div class="flex gap-2">
+                <div class="relative flex-1">
+                    <input type="text" id="searchInput" oninput="renderMainView()" placeholder="제목, 내용, 멤버, 닉네임 검색..." class="w-full bg-gray-100 dark:bg-gray-800 text-xs sm:text-sm border border-gray-200 dark:border-gray-700 rounded-xl py-2.5 pl-9 pr-4 focus:outline-none focus:ring-2 focus:ring-[#73B5FE]">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                </div>
+                <button onclick="openPostModal()" class="flex items-center gap-1.5 bg-[#73B5FE] text-white px-4 py-2.5 rounded-xl font-bold text-xs hover:opacity-90 transition whitespace-nowrap">
+                    <i class="fa-solid fa-plus"></i>
+                    <span id="uploadBtnText">동영상 올리기</span>
+                </button>
+            </div>
+
+            <!-- 멤버/조 필터 -->
+            <div id="memberFilterContainer" class="flex items-center gap-1.5 overflow-x-auto custom-scrollbar pb-1 text-xs"></div>
+        </section>
+
+        <!-- 1. 동영상 피드 뷰 -->
+        <section id="videoSection" class="flex flex-col gap-6">
+            <div id="videoGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5"></div>
+        </section>
+
+        <!-- 2. 동영상 플레이어 상세 뷰 -->
+        <section id="videoDetailView" class="hidden flex flex-col lg:flex-row gap-6">
+            <div class="flex-1 flex flex-col gap-4">
+                <button onclick="closeVideoDetail()" class="self-start flex items-center gap-2 text-xs font-semibold text-gray-500 hover:text-gray-900 dark:hover:text-white">
+                    <i class="fa-solid fa-arrow-left"></i> 목록으로 돌아가기
+                </button>
+                <div class="relative bg-black rounded-2xl overflow-hidden aspect-video shadow-lg">
+                    <video id="mainVideoPlayer" class="w-full h-full object-contain" controls></video>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <h1 id="videoDetailTitle" class="text-xl font-bold"></h1>
+                    <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 py-2 border-b border-gray-200 dark:border-gray-800">
+                        <span id="videoDetailMeta"></span>
+                        <button onclick="likeVideo()" class="flex items-center gap-1.5 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-full font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition">
+                            <i class="fa-solid fa-heart text-red-500"></i>
+                            <span id="videoLikeCount">0</span>
+                        </button>
+                    </div>
+                    <p id="videoDetailDesc" class="text-xs sm:text-sm text-gray-700 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-gray-900 p-3.5 rounded-xl mt-1"></p>
+                </div>
+
+                <!-- 댓글 섹션 -->
+                <div class="mt-4 flex flex-col gap-3">
+                    <h3 class="font-bold text-sm">댓글 <span id="videoCommentCount">0</span>개</h3>
+                    <form onsubmit="addVideoComment(event)" class="flex gap-2">
+                        <input type="text" id="videoCommentInput" placeholder="댓글 추가..." required class="flex-1 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#73B5FE]">
+                        <button type="submit" class="bg-[#73B5FE] text-white px-4 py-2 rounded-lg text-xs font-bold hover:opacity-90">등록</button>
+                    </form>
+                    <div id="videoCommentList" class="flex flex-col gap-2.5 mt-1"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. 커뮤니티 피드 뷰 -->
+        <section id="communitySection" class="hidden flex flex-col gap-4">
+            <div class="flex gap-2 border-b border-gray-200 dark:border-gray-800 pb-2 text-xs font-semibold">
+                <button onclick="setCommunitySubCategory('전체')" class="comm-sub-tab px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white">전체</button>
+                <button onclick="setCommunitySubCategory('잡담')" class="comm-sub-tab px-3 py-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800">💬 잡담</button>
+                <button onclick="setCommunitySubCategory('그림')" class="comm-sub-tab px-3 py-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800">🎨 그림</button>
+                <button onclick="setCommunitySubCategory('글')" class="comm-sub-tab px-3 py-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800">📝 글</button>
+            </div>
+            <div id="communityPostList" class="flex flex-col gap-4"></div>
+        </section>
+
+        <!-- 4. 개인 채널 (프로필) 뷰 -->
+        <section id="channelSection" class="hidden flex flex-col gap-6">
+            <div class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 flex flex-col sm:flex-row items-center gap-5">
+                <div id="channelAvatar" class="w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-md overflow-hidden bg-cover bg-center"></div>
+                <div class="flex-1 text-center sm:text-left flex flex-col gap-1">
+                    <div class="flex items-center justify-center sm:justify-start gap-2">
+                        <h1 id="channelName" class="text-2xl font-extrabold"></h1>
+                        <span id="channelIsMeBadge" class="hidden text-[10px] bg-[#73B5FE]/20 text-[#73B5FE] px-2 py-0.5 rounded-full font-bold">내 채널</span>
+                        <!-- 프로필 수정 버튼 -->
+                        <button id="editProfileBtn" onclick="openEditProfileModal()" class="hidden text-xs bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 px-2.5 py-1 rounded-lg font-semibold transition ml-2">
+                            <i class="fa-solid fa-pen text-[10px] mr-1"></i>프로필 수정
+                        </button>
+                    </div>
+                    <p id="channelStats" class="text-xs text-gray-500 dark:text-gray-400"></p>
+                </div>
+            </div>
+
+            <div class="flex gap-4 border-b border-gray-200 dark:border-gray-800 text-xs font-bold">
+                <button id="channelTabVideosBtn" onclick="switchChannelTab('videos')" class="pb-2 border-b-2 border-[#73B5FE] text-[#73B5FE]">동영상</button>
+                <button id="channelTabPostsBtn" onclick="switchChannelTab('posts')" class="pb-2 text-gray-400 hover:text-gray-700 dark:hover:text-white">커뮤니티 글</button>
+            </div>
+
+            <div id="channelVideoGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5"></div>
+            <div id="channelPostList" class="hidden flex flex-col gap-4"></div>
+        </section>
+
+        <!-- 5. 관리자 페이지 뷰 -->
+        <section id="adminSection" class="hidden flex flex-col gap-5">
+            <div class="flex items-center justify-between border-b pb-3 border-gray-200 dark:border-gray-800">
+                <h2 class="text-lg font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-user-shield text-[#73B5FE]"></i> 관리자 전용 대시보드
+                </h2>
+                <button onclick="goHome()" class="text-xs text-gray-500 hover:underline">사용자 모드로 돌아가기</button>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div class="bg-gray-50 dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 text-center">
+                    <span class="text-xs text-gray-500">총 동영상</span>
+                    <p id="statTotalVideos" class="text-xl font-bold text-[#73B5FE] mt-1">0</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 text-center">
+                    <span class="text-xs text-gray-500">총 커뮤니티 글</span>
+                    <p id="statTotalPosts" class="text-xl font-bold text-[#73B5FE] mt-1">0</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 text-center">
+                    <span class="text-xs text-gray-500">총 조회수</span>
+                    <p id="statTotalViews" class="text-xl font-bold text-[#73B5FE] mt-1">0</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 text-center">
+                    <span class="text-xs text-gray-500">총 댓글 수</span>
+                    <p id="statTotalComments" class="text-xl font-bold text-[#73B5FE] mt-1">0</p>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <h3 class="font-bold text-sm">게시물 관리 및 삭제</h3>
+                <div id="adminPostList" class="flex flex-col gap-2"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 업로드 모달 -->
+    <div id="postModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-gray-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b pb-3 border-gray-200 dark:border-gray-800">
+                <h2 id="postModalTitle" class="text-base font-bold">동영상 업로드</h2>
+                <button onclick="closePostModal()" class="text-gray-400 hover:text-gray-700 dark:hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="postForm" onsubmit="handlePostSubmit(event)" class="flex flex-col gap-4 text-xs">
+                <div id="commTypeGroup" class="hidden">
+                    <label class="block font-semibold mb-1">카테고리</label>
+                    <select id="commCategorySelect" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-2.5 focus:outline-none">
+                        <option value="잡담">💬 잡담</option>
+                        <option value="그림">🎨 그림</option>
+                        <option value="글">📝 글</option>
+                    </select>
+                </div>
+
+                <div id="videoFileGroup">
+                    <label class="block font-semibold mb-1">동영상 파일 선택 (*필수)</label>
+                    <input type="file" id="videoFileInput" accept="video/*" class="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 dark:file:bg-gray-800 dark:file:text-gray-300">
+                </div>
+
+                <div>
+                    <label class="block font-semibold mb-1">썸네일/이미지 선택 (선택 사항)</label>
+                    <input type="file" id="imageFileInput" accept="image/*" class="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 dark:file:bg-gray-800 dark:file:text-gray-300">
+                </div>
+
+                <div>
+                    <label class="block font-semibold mb-1">제목</label>
+                    <input type="text" id="postTitleInput" placeholder="제목을 입력하세요" required class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-2.5 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block font-semibold mb-1.5">관련 멤버 선택</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <label class="flex items-center gap-1.5 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"><input type="checkbox" name="memberCheck" value="잠뜰" class="accent-[#73B5FE]"> 잠뜰</label>
+                        <label class="flex items-center gap-1.5 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"><input type="checkbox" name="memberCheck" value="각별" class="accent-[#73B5FE]"> 각별</label>
+                        <label class="flex items-center gap-1.5 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"><input type="checkbox" name="memberCheck" value="공룡" class="accent-[#73B5FE]"> 공룡</label>
+                        <label class="flex items-center gap-1.5 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"><input type="checkbox" name="memberCheck" value="수현" class="accent-[#73B5FE]"> 수현</label>
+                        <label class="flex items-center gap-1.5 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"><input type="checkbox" name="memberCheck" value="라더" class="accent-[#73B5FE]"> 라더</label>
+                        <label class="flex items-center gap-1.5 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"><input type="checkbox" name="memberCheck" value="덕개" class="accent-[#73B5FE]"> 덕개</label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold mb-1">내용 / 설명</label>
+                    <textarea id="postContentInput" rows="3" placeholder="내용을 작성하세요..." class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-2.5 focus:outline-none resize-none"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closePostModal()" class="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition">취소</button>
+                    <button type="submit" class="px-4 py-2 rounded-lg bg-[#73B5FE] text-white font-bold hover:opacity-90 transition">게시하기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 🔑 관리자 설정
+        const ADMIN_PASSWORD = "2529"; // 👈 사용할 비밀번호 입력
+        const ADMIN_NICKNAME = "";     // 👈 특정 닉네임만 접속 허용하고 싶다면 입력 (예: "관리자"), 미사용 시 빈칸 ""
+
+        const UNIT_MAP = {
+            '잠뜰,각별': '이과조/연장자조', '각별,잠뜰': '이과조/연장자조',
+            '잠뜰,공룡': '주작조', '공룡,잠뜰': '주작조',
+            '잠뜰,수현': '잠컴조/집사조', '수현,잠뜰': '잠컴조/집사조',
+            '잠뜰,라더': '바다조', '라더,잠뜰': '바다조',
+            '잠뜰,덕개': '저녁노을조', '덕개,잠뜰': '저녁노을조',
+            '각별,공룡': '후드조/공각', '공룡,각별': '후드조/공각',
+            '각별,수현': '원험조', '수현,각별': '원험조',
+            '각별,라더': '괴짜조', '라더,각별': '괴짜조',
+            '각별,덕개': '각개전투조/맏막조', '덕개,각별': '각개전투조/맏막조',
+            '공룡,수현': '오로라조', '수현,공룡': '오로라조',
+            '공룡,라더': '이빨조', '라더,공룡': '이빨조',
+            '공룡,덕개': '부산조', '덕개,공룡': '부산조',
+            '수현,라더': '황혼조', '라더,수현': '황혼조',
+            '수현,덕개': '인덕션조/무해조', '덕개,수현': '인덕션조/무해조',
+            '라더,덕개': '라떡조', '덕개,라더': '라떡조'
+        };
+
+        const MEMBERS = ['잠뜰', '각별', '공룡', '수현', '라더', '덕개'];
+        const UNITS = ['주작조', '라떡조', '이과조', '연장자조', '오로라조', '괴짜조', '바다조', '저녁노을조', '원험조', '이빨조', '부산조', '황혼조'];
+
+        let currentUser = JSON.parse(localStorage.getItem('pixel_user')) || null;
+        let currentTab = 'video';
+        let currentFilter = '전체';
+        let commSubCategory = '전체';
+        let selectedColor = '#73B5FE';
+        let currentChannelUser = null;
+        let channelInnerTab = 'videos';
+
+        let videos = JSON.parse(localStorage.getItem('pixel_videos')) || [];
+        let posts = JSON.parse(localStorage.getItem('pixel_posts')) || [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initUserProfile();
+            renderFilters();
+            renderMainView();
+        });
+
+        function saveData() {
+            localStorage.setItem('pixel_videos', JSON.stringify(videos));
+            localStorage.setItem('pixel_posts', JSON.stringify(posts));
+        }
+
+        function initUserProfile() {
+            if (!currentUser) {
+                document.getElementById('profileModalTitle').innerText = "환영합니다! 👋";
+                document.getElementById('cancelProfileBtn').classList.add('hidden');
+                document.getElementById('userProfileModal').classList.remove('hidden');
+                selectColor('#73B5FE');
+            } else {
+                document.getElementById('userProfileModal').classList.add('hidden');
+                updateProfileUI();
+            }
+        }
+
+        function openEditProfileModal() {
+            if (!currentUser) return;
+            document.getElementById('profileModalTitle').innerText = "프로필 수정 ✏️";
+            document.getElementById('initNicknameInput').value = currentUser.name;
+            document.getElementById('cancelProfileBtn').classList.remove('hidden');
+            selectColor(currentUser.color || '#73B5FE');
+            document.getElementById('userProfileModal').classList.remove('hidden');
+        }
+
+        function closeProfileModal() {
+            document.getElementById('userProfileModal').classList.add('hidden');
+        }
+
+        function selectColor(color) {
+            selectedColor = color;
+            document.querySelectorAll('.color-opt').forEach(btn => {
+                const btnColor = btn.getAttribute('data-color').toUpperCase();
+                const targetColor = color.toUpperCase();
+                if (btnColor === targetColor) {
+                    btn.classList.add('ring-gray-900', 'dark:ring-white', 'scale-110');
+                    btn.classList.remove('ring-transparent');
+                } else {
+                    btn.classList.remove('ring-gray-900', 'dark:ring-white', 'scale-110');
+                    btn.classList.add('ring-transparent');
+                }
+            });
+        }
+
+        document.getElementById('saveProfileBtn').addEventListener('click', () => {
+            const oldName = currentUser ? currentUser.name : null;
+            const nick = document.getElementById('initNicknameInput').value.trim() || '익명' + Math.floor(Math.random()*1000);
+            const imgFile = document.getElementById('profileImageInput').files[0];
+
+            let photoUrl = currentUser ? currentUser.photo : null;
+            if (imgFile) {
+                photoUrl = URL.createObjectURL(imgFile);
+            }
+
+            currentUser = { 
+                name: nick, 
+                color: selectedColor,
+                photo: photoUrl
+            };
+            
+            if (oldName && oldName !== nick) {
+                videos.forEach(v => { if (v.author === oldName) v.author = nick; });
+                posts.forEach(p => { if (p.author === oldName) p.author = nick; });
+                saveData();
+            }
+
+            localStorage.setItem('pixel_user', JSON.stringify(currentUser));
+            document.getElementById('userProfileModal').classList.add('hidden');
+            updateProfileUI();
+
+            if (currentTab === 'channel') {
+                currentChannelUser = nick;
+                renderMainView();
+            }
+        });
+
+        function updateProfileUI() {
+            if (!currentUser) return;
+            document.getElementById('headerUserName').innerText = currentUser.name;
+            const dot = document.getElementById('userAvatarDot');
+            
+            if (currentUser.photo) {
+                dot.style.backgroundImage = `url('${currentUser.photo}')`;
+                dot.style.backgroundSize = 'cover';
+                dot.innerText = '';
+            } else {
+                dot.style.backgroundImage = 'none';
+                dot.style.backgroundColor = currentUser.color;
+                dot.innerText = '';
+            }
+        }
+
+        document.getElementById('themeToggleBtn').addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+        });
+
+        function renderFilters() {
+            const container = document.getElementById('memberFilterContainer');
+            const allFilters = ['전체', ...MEMBERS, ...UNITS];
+            container.innerHTML = allFilters.map(f => `
+                <button onclick="setFilter('${f}')" class="px-3 py-1 rounded-full whitespace-nowrap transition border ${currentFilter === f ? 'bg-[#73B5FE] text-white border-[#73B5FE] font-bold' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-transparent hover:bg-gray-200'}">
+                    ${f}
+                </button>
+            `).join('');
+        }
+
+        function setFilter(f) {
+            currentFilter = f;
+            renderFilters();
+            renderMainView();
+        }
+
+        function goHome() {
+            currentTab = 'video';
+            updateTabStyle();
+            renderMainView();
+        }
+
+        function switchTab(tab) {
+            // 관리자 탭 접근 검증
+            if (tab === 'admin') {
+                if (ADMIN_NICKNAME && (!currentUser || currentUser.name !== ADMIN_NICKNAME)) {
+                    alert('관리자 권한이 있는 계정만 접근할 수 있습니다.');
+                    return;
+                }
+                const inputPw = prompt('관리자 비밀번호를 입력하세요:');
+                if (inputPw !== ADMIN_PASSWORD) {
+                    alert('비밀번호가 올바르지 않습니다.');
+                    return;
+                }
+            }
+
+            currentTab = tab;
+            updateTabStyle();
+            renderMainView();
+        }
+
+        document.getElementById('tabVideoBtn').addEventListener('click', () => switchTab('video'));
+        document.getElementById('tabCommunityBtn').addEventListener('click', () => switchTab('community'));
+
+        function updateTabStyle() {
+            const tabVideoBtn = document.getElementById('tabVideoBtn');
+            const tabCommunityBtn = document.getElementById('tabCommunityBtn');
+
+            if (currentTab === 'video') {
+                tabVideoBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white transition";
+                tabVideoBtn.querySelector('i').className = "fa-solid fa-film text-[#73B5FE]";
+                tabCommunityBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition";
+                tabCommunityBtn.querySelector('i').className = "fa-solid fa-comments";
+                document.getElementById('uploadBtnText').innerText = '동영상 올리기';
+            } else if (currentTab === 'community') {
+                tabCommunityBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white transition";
+                tabCommunityBtn.querySelector('i').className = "fa-solid fa-comments text-[#73B5FE]";
+                tabVideoBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition";
+                tabVideoBtn.querySelector('i').className = "fa-solid fa-film";
+                document.getElementById('uploadBtnText').innerText = '글쓰기';
+            }
+        }
+
+        function renderMainView() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            
+            document.getElementById('videoSection').classList.add('hidden');
+            document.getElementById('videoDetailView').classList.add('hidden');
+            document.getElementById('communitySection').classList.add('hidden');
+            document.getElementById('channelSection').classList.add('hidden');
+            document.getElementById('adminSection').classList.add('hidden');
+            document.getElementById('filterSection').classList.remove('hidden');
+
+            if (currentTab === 'video') {
+                document.getElementById('videoSection').classList.remove('hidden');
+                renderVideoGrid(query);
+            } else if (currentTab === 'community') {
+                document.getElementById('communitySection').classList.remove('hidden');
+                renderCommunityList(query);
+            } else if (currentTab === 'channel') {
+                document.getElementById('filterSection').classList.add('hidden');
+                document.getElementById('channelSection').classList.remove('hidden');
+                renderChannelView();
+            } else if (currentTab === 'admin') {
+                document.getElementById('filterSection').classList.add('hidden');
+                document.getElementById('adminSection').classList.remove('hidden');
+                renderAdminDashboard();
+            }
+        }
+
+        function renderVideoGrid(query) {
+            const grid = document.getElementById('videoGrid');
+            let list = videos.filter(v => {
+                const matchFilter = currentFilter === '전체' || v.members.includes(currentFilter) || v.units.some(u => u.includes(currentFilter));
+                const matchQuery = v.title.toLowerCase().includes(query) || v.desc.toLowerCase().includes(query) || v.author.toLowerCase().includes(query);
+                return matchFilter && matchQuery;
+            });
+
+            if (list.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-16 text-gray-400 text-xs">등록된 동영상이 없거나 검색 결과가 없습니다.<br>우측 상단 '+ 동영상 올리기' 버튼을 눌러 첫 영상을 공유해보세요!</div>`;
+                return;
+            }
+
+            grid.innerHTML = list.map(v => `
+                <div class="group flex flex-col gap-2">
+                    <div onclick="openVideoDetail('${v.id}')" class="relative aspect-video rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 cursor-pointer flex items-center justify-center">
+                        ${v.thumbUrl 
+                            ? `<img src="${v.thumbUrl}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">`
+                            : `<div class="w-full h-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center text-gray-400"><i class="fa-solid fa-play text-2xl"></i></div>`
+                        }
+                    </div>
+                    <div class="flex gap-2.5 items-start mt-1">
+                        <div onclick="openChannel('${v.author}')" class="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-white text-xs font-bold cursor-pointer hover:opacity-80 overflow-hidden bg-cover bg-center" style="background-color: ${v.authorColor}; ${v.authorPhoto ? `background-image: url('${v.authorPhoto}')` : ''}">
+                            ${!v.authorPhoto ? v.author[0] : ''}
+                        </div>
+                        <div class="flex flex-col gap-0.5 overflow-hidden">
+                            <h4 onclick="openVideoDetail('${v.id}')" class="font-bold text-xs leading-snug text-ellipse-2 group-hover:text-[#73B5FE] transition cursor-pointer">${v.title}</h4>
+                            <p class="text-[11px] text-gray-500">
+                                <span onclick="openChannel('${v.author}')" class="hover:underline cursor-pointer font-medium">${v.author}</span> • 조회수 ${v.views}회
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openChannel(authorName) {
+            currentChannelUser = authorName;
+            currentTab = 'channel';
+            renderMainView();
+        }
+
+        function openMyChannel() {
+            if (!currentUser) return;
+            openChannel(currentUser.name);
+        }
+
+        function switchChannelTab(tab) {
+            channelInnerTab = tab;
+            renderChannelView();
+        }
+
+        function renderChannelView() {
+            const userVideos = videos.filter(v => v.author === currentChannelUser);
+            const userPosts = posts.filter(p => p.author === currentChannelUser);
+            
+            const channelAvatar = document.getElementById('channelAvatar');
+            const channelName = document.getElementById('channelName');
+            const channelStats = document.getElementById('channelStats');
+            const channelIsMeBadge = document.getElementById('channelIsMeBadge');
+            const editBtn = document.getElementById('editProfileBtn');
+
+            channelName.innerText = currentChannelUser;
+            channelStats.innerText = `동영상 ${userVideos.length}개 • 커뮤니티 글 ${userPosts.length}개`;
+
+            if (currentUser && currentUser.name === currentChannelUser) {
+                channelIsMeBadge.classList.remove('hidden');
+                editBtn.classList.remove('hidden');
+                
+                if (currentUser.photo) {
+                    channelAvatar.style.backgroundImage = `url('${currentUser.photo}')`;
+                    channelAvatar.style.backgroundColor = 'transparent';
+                    channelAvatar.innerText = '';
+                } else {
+                    channelAvatar.style.backgroundImage = 'none';
+                    channelAvatar.style.backgroundColor = currentUser.color;
+                    channelAvatar.innerText = currentChannelUser[0];
+                }
+            } else {
+                channelIsMeBadge.classList.add('hidden');
+                editBtn.classList.add('hidden');
+                const sampleColor = userVideos[0]?.authorColor || userPosts[0]?.authorColor || '#73B5FE';
+                channelAvatar.style.backgroundImage = 'none';
+                channelAvatar.style.backgroundColor = sampleColor;
+                channelAvatar.innerText = currentChannelUser[0];
+            }
+
+            const vBtn = document.getElementById('channelTabVideosBtn');
+            const pBtn = document.getElementById('channelTabPostsBtn');
+            const vGrid = document.getElementById('channelVideoGrid');
+            const pList = document.getElementById('channelPostList');
+
+            if (channelInnerTab === 'videos') {
+                vBtn.className = "pb-2 border-b-2 border-[#73B5FE] text-[#73B5FE]";
+                pBtn.className = "pb-2 text-gray-400 hover:text-gray-700 dark:hover:text-white";
+                vGrid.classList.remove('hidden');
+                pList.classList.add('hidden');
+
+                if (userVideos.length === 0) {
+                    vGrid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-400 text-xs">업로드한 동영상이 없습니다.</div>`;
+                } else {
+                    vGrid.innerHTML = userVideos.map(v => `
+                        <div onclick="openVideoDetail('${v.id}')" class="group flex flex-col gap-2 cursor-pointer">
+                            <div class="relative aspect-video rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                                ${v.thumbUrl 
+                                    ? `<img src="${v.thumbUrl}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">`
+                                    : `<i class="fa-solid fa-play text-xl text-gray-400"></i>`
+                                }
+                            </div>
+                            <h4 class="font-bold text-xs leading-snug text-ellipse-2 group-hover:text-[#73B5FE] transition">${v.title}</h4>
+                            <p class="text-[11px] text-gray-500">조회수 ${v.views}회 • ${v.date}</p>
+                        </div>
+                    `).join('');
+                }
+            } else {
+                pBtn.className = "pb-2 border-b-2 border-[#73B5FE] text-[#73B5FE]";
+                vBtn.className = "pb-2 text-gray-400 hover:text-gray-700 dark:hover:text-white";
+                pList.classList.remove('hidden');
+                vGrid.classList.add('hidden');
+
+                if (userPosts.length === 0) {
+                    pList.innerHTML = `<div class="text-center py-12 text-gray-400 text-xs">작성한 커뮤니티 글이 없습니다.</div>`;
+                } else {
+                    pList.innerHTML = userPosts.map(p => `
+                        <div class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-4 rounded-xl flex flex-col gap-2">
+                            <span class="text-[10px] font-bold text-[#73B5FE] bg-[#73B5FE]/10 px-2 py-0.5 rounded-full w-fit">${p.category}</span>
+                            <h3 class="font-bold text-sm">${p.title}</h3>
+                            <p class="text-xs text-gray-600 dark:text-gray-300">${p.content}</p>
+                            <span class="text-[11px] text-gray-400 mt-1">${p.date}</span>
+                        </div>
+                    `).join('');
+                }
+            }
+        }
+
+        let activeVideoId = null;
+        function openVideoDetail(id) {
+            const v = videos.find(item => item.id === id);
+            if (!v) return;
+
+            activeVideoId = id;
+            v.views += 1;
+            saveData();
+
+            document.getElementById('videoSection').classList.add('hidden');
+            document.getElementById('filterSection').classList.add('hidden');
+            document.getElementById('videoDetailView').classList.remove('hidden');
+
+            const player = document.getElementById('mainVideoPlayer');
+            player.src = v.videoUrl;
+            player.play();
+
+            document.getElementById('videoDetailTitle').innerText = v.title;
+            document.getElementById('videoDetailMeta').innerText = `${v.author} • 조회수 ${v.views}회 • ${v.date}`;
+            document.getElementById('videoDetailDesc').innerText = v.desc || '설명이 없습니다.';
+            document.getElementById('videoLikeCount').innerText = v.likes;
+
+            renderComments(v);
+        }
+
+        function closeVideoDetail() {
+            const player = document.getElementById('mainVideoPlayer');
+            player.pause();
+            renderMainView();
+        }
+
+        function likeVideo() {
+            const v = videos.find(item => item.id === activeVideoId);
+            if (!v) return;
+            v.likes += 1;
+            document.getElementById('videoLikeCount').innerText = v.likes;
+            saveData();
+        }
+
+        function addVideoComment(e) {
+            e.preventDefault();
+            if (!currentUser) return alert('프로필을 먼저 설정해주세요.');
+            
+            const v = videos.find(item => item.id === activeVideoId);
+            const input = document.getElementById('videoCommentInput');
+            if (!v || !input.value.trim()) return;
+
+            v.comments.push({
+                id: 'c' + Date.now(),
+                author: currentUser.name,
+                text: input.value.trim(),
+                date: '방금 전'
+            });
+
+            input.value = '';
+            saveData();
+            renderComments(v);
+        }
+
+        function renderComments(v) {
+            document.getElementById('videoCommentCount').innerText = v.comments.length;
+            const list = document.getElementById('videoCommentList');
+            if (v.comments.length === 0) {
+                list.innerHTML = `<div class="text-xs text-gray-400 py-2">첫 댓글을 작성해보세요!</div>`;
+                return;
+            }
+            list.innerHTML = v.comments.map(c => `
+                <div class="flex items-start gap-2 text-xs border-b border-gray-100 dark:border-gray-800/50 pb-2">
+                    <span onclick="openChannel('${c.author}')" class="font-bold text-[#73B5FE] hover:underline cursor-pointer">${c.author}</span>
+                    <span class="flex-1 text-gray-700 dark:text-gray-300">${c.text}</span>
+                    <span class="text-[10px] text-gray-400">${c.date}</span>
+                </div>
+            `).join('');
+        }
+
+        function setCommunitySubCategory(cat) {
+            commSubCategory = cat;
+            renderCommunityList(document.getElementById('searchInput').value.toLowerCase());
+        }
+
+        function renderCommunityList(query) {
+            const listContainer = document.getElementById('communityPostList');
+            let list = posts.filter(p => {
+                const matchSub = commSubCategory === '전체' || p.category === commSubCategory;
+                const matchFilter = currentFilter === '전체' || p.members.includes(currentFilter) || p.units.some(u => u.includes(currentFilter));
+                const matchQuery = p.title.toLowerCase().includes(query) || p.content.toLowerCase().includes(query) || p.author.toLowerCase().includes(query);
+                return matchSub && matchFilter && matchQuery;
+            });
+
+            if (list.length === 0) {
+                listContainer.innerHTML = `<div class="text-center py-16 text-gray-400 text-xs">작성된 게시글이 없습니다. 첫 글을 작성해보세요!</div>`;
+                return;
+            }
+
+            listContainer.innerHTML = list.map(p => `
+                <div class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-4 rounded-xl flex flex-col gap-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div onclick="openChannel('${p.author}')" class="w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] font-bold cursor-pointer hover:opacity-80 overflow-hidden bg-cover bg-center" style="background-color: ${p.authorColor}; ${p.authorPhoto ? `background-image: url('${p.authorPhoto}')` : ''}">
+                                ${!p.authorPhoto ? p.author[0] : ''}
+                            </div>
+                            <span onclick="openChannel('${p.author}')" class="font-bold text-xs hover:underline cursor-pointer">${p.author}</span>
+                            <span class="text-[10px] text-gray-400">${p.date}</span>
+                        </div>
+                        <span class="text-[10px] bg-[#73B5FE]/10 text-[#73B5FE] font-bold px-2 py-0.5 rounded-full">${p.category}</span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-sm mb-1">${p.title}</h3>
+                        <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">${p.content}</p>
+                    </div>
+                    ${p.imgUrl ? `<img src="${p.imgUrl}" class="rounded-lg max-h-60 object-cover w-full">` : ''}
+                </div>
+            `).join('');
+        }
+
+        function openPostModal() {
+            if (!currentUser) return alert('프로필을 먼저 설정해주세요.');
+            document.getElementById('postModal').classList.remove('hidden');
+
+            const commGroup = document.getElementById('commTypeGroup');
+            const videoGroup = document.getElementById('videoFileGroup');
+            const modalTitle = document.getElementById('postModalTitle');
+
+            if (currentTab === 'video') {
+                modalTitle.innerText = '동영상 업로드';
+                commGroup.classList.add('hidden');
+                videoGroup.classList.remove('hidden');
+            } else {
+                modalTitle.innerText = '커뮤니티 글 작성';
+                commGroup.classList.remove('hidden');
+                videoGroup.classList.add('hidden');
+            }
+        }
+
+        function closePostModal() {
+            document.getElementById('postModal').classList.add('hidden');
+            document.getElementById('postForm').reset();
+        }
+
+        function handlePostSubmit(e) {
+            e.preventDefault();
+            const title = document.getElementById('postTitleInput').value.trim();
+            const content = document.getElementById('postContentInput').value.trim();
+            const videoFile = document.getElementById('videoFileInput').files[0];
+            const imageFile = document.getElementById('imageFileInput').files[0];
+
+            const checkedMembers = Array.from(document.querySelectorAll('input[name="memberCheck"]:checked')).map(cb => cb.value);
+            
+            let matchedUnits = [];
+            if (checkedMembers.length === 2) {
+                const key = checkedMembers.join(',');
+                if (UNIT_MAP[key]) matchedUnits.push(UNIT_MAP[key]);
+            }
+
+            if (currentTab === 'video') {
+                if (!videoFile) return alert('동영상 파일을 선택해야 합니다.');
+                
+                const videoUrl = URL.createObjectURL(videoFile);
+                const thumbUrl = imageFile ? URL.createObjectURL(imageFile) : '';
+
+                videos.unshift({
+                    id: 'v' + Date.now(),
+                    title: title,
+                    desc: content,
+                    author: currentUser.name,
+                    authorColor: currentUser.color,
+                    authorPhoto: currentUser.photo,
+                    members: checkedMembers,
+                    units: matchedUnits,
+                    videoUrl: videoUrl,
+                    thumbUrl: thumbUrl,
+                    views: 0,
+                    likes: 0,
+                    comments: [],
+                    date: new Date().toISOString().split('T')[0]
+                });
+            } else {
+                const category = document.getElementById('commCategorySelect').value;
+                const imgUrl = imageFile ? URL.createObjectURL(imageFile) : '';
+
+                posts.unshift({
+                    id: 'p' + Date.now(),
+                    category: category,
+                    title: title,
+                    content: content,
+                    author: currentUser.name,
+                    authorColor: currentUser.color,
+                    authorPhoto: currentUser.photo,
+                    members: checkedMembers,
+                    units: matchedUnits,
+                    imgUrl: imgUrl,
+                    likes: 0,
+                    comments: [],
+                    date: new Date().toISOString().split('T')[0]
+                });
+            }
+
+            saveData();
+            closePostModal();
+            renderMainView();
+        }
+
+        function renderAdminDashboard() {
+            document.getElementById('statTotalVideos').innerText = videos.length;
+            document.getElementById('statTotalPosts').innerText = posts.length;
+            document.getElementById('statTotalViews').innerText = videos.reduce((acc, v) => acc + v.views, 0);
+            
+            const totalVideoComments = videos.reduce((acc, v) => acc + v.comments.length, 0);
+            const totalPostComments = posts.reduce((acc, p) => acc + p.comments.length, 0);
+            document.getElementById('statTotalComments').innerText = totalVideoComments + totalPostComments;
+
+            const adminList = document.getElementById('adminPostList');
+            const allItems = [
+                ...videos.map(v => ({ ...v, type: '동영상' })),
+                ...posts.map(p => ({ ...p, type: '커뮤니티' }))
+            ];
+
+            if (allItems.length === 0) {
+                adminList.innerHTML = `<div class="text-center py-8 text-gray-400 text-xs">관리할 데이터가 없습니다.</div>`;
+                return;
+            }
+
+            adminList.innerHTML = allItems.map(item => `
+                <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg text-xs">
+                    <div class="flex items-center gap-2">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold ${item.type === '동영상' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'}">${item.type}</span>
+                        <span class="font-bold">${item.title}</span>
+                        <span class="text-gray-400">(${item.author})</span>
+                    </div>
+                    <button onclick="deleteItem('${item.type}', '${item.id}')" class="text-red-500 font-bold hover:underline">삭제</button>
+                </div>
+            `).join('');
+        }
+
+        function deleteItem(type, id) {
+            if (!confirm('정말 삭제하시겠습니까?')) return;
+            if (type === '동영상') {
+                videos = videos.filter(v => v.id !== id);
+            } else {
+                posts = posts.filter(p => p.id !== id);
+            }
+            saveData();
+            renderAdminDashboard();
+        }
+    </script>
+</body>
+</html>
