@@ -41,6 +41,7 @@
                 <div>
                     <label class="block text-xs font-semibold mb-1">닉네임</label>
                     <input type="text" id="initNicknameInput" placeholder="닉네임을 입력하세요" class="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#73B5FE]">
+                    <p id="nicknameNoticeText" class="text-[11px] text-red-500 mt-1 hidden"></p>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold mb-2">프로필 색상</label>
@@ -161,6 +162,12 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        // 사용 금지 닉네임 단어 목록
+        const BANNED_NICKNAMES = [
+            "라더", "덕개", "각별", "공룡", "잠뜰", "수현",
+            "sleepground", "rather", "duckgae", "rockggun", "hsrd", "heptagram", "ehdgh141", "dino", "suhyen"
+        ];
+
         let currentUser = JSON.parse(localStorage.getItem('pixel_user')) || null;
         let currentTab = 'video';
         let selectedColor = '#73B5FE';
@@ -195,7 +202,7 @@
         // 프로필 관리 및 자동 로그인
         function initUserProfile() {
             if (!currentUser) {
-                openProfileModal(true); // 첫 접속 시 강제 모달
+                openProfileModal(true);
             } else {
                 selectedColor = currentUser.color || '#73B5FE';
                 updateProfileUI();
@@ -206,6 +213,8 @@
             const closeBtn = document.getElementById('closeProfileModalBtn');
             const actionBtns = document.getElementById('accountActionButtons');
             const title = document.getElementById('profileModalTitle');
+            const noticeText = document.getElementById('nicknameNoticeText');
+            noticeText.classList.add('hidden');
 
             if (currentUser && !isFirstTime) {
                 document.getElementById('initNicknameInput').value = currentUser.name || '';
@@ -240,13 +249,58 @@
             });
         }
 
-        document.getElementById('saveProfileBtn').addEventListener('click', () => {
-            const nick = document.getElementById('initNicknameInput').value.trim() || '익명' + Math.floor(Math.random()*1000);
-            currentUser = { name: nick, color: selectedColor };
+        // 닉네임 검증 및 저장
+        document.getElementById('saveProfileBtn').addEventListener('click', async () => {
+            const nickInput = document.getElementById('initNicknameInput').value.trim();
+            const noticeText = document.getElementById('nicknameNoticeText');
+            noticeText.classList.add('hidden');
+
+            if (!nickInput) {
+                noticeText.innerText = "닉네임을 입력해주세요.";
+                noticeText.classList.remove('hidden');
+                return;
+            }
+
+            // 1. 금지 단어 포함 여부 확인 (대소문자 무관)
+            const lowerInput = nickInput.toLowerCase();
+            const isBanned = BANNED_NICKNAMES.some(banned => lowerInput.includes(banned));
+            
+            if (isBanned) {
+                noticeText.innerText = "사용할 수 없는 닉네임입니다.";
+                noticeText.classList.remove('hidden');
+                return;
+            }
+
+            // 2. 본인의 기존 닉네임과 동일한 경우 바로 저장
+            if (currentUser && currentUser.name === nickInput) {
+                currentUser.color = selectedColor;
+                localStorage.setItem('pixel_user', JSON.stringify(currentUser));
+                document.getElementById('userProfileModal').classList.add('hidden');
+                updateProfileUI();
+                return;
+            }
+
+            // 3. 실시간 DB 중복 확인
+            const isDuplicate = await checkNicknameExists(nickInput);
+            if (isDuplicate) {
+                noticeText.innerText = "이미 사용 중인 닉네임입니다. 다른 닉네임을 사용해주세요.";
+                noticeText.classList.remove('hidden');
+                return;
+            }
+
+            currentUser = { name: nickInput, color: selectedColor };
             localStorage.setItem('pixel_user', JSON.stringify(currentUser));
             document.getElementById('userProfileModal').classList.add('hidden');
             updateProfileUI();
         });
+
+        async function checkNicknameExists(nickname) {
+            const snapshot = await db.ref('posts').once('value');
+            const data = snapshot.val();
+            if (!data) return false;
+
+            return Object.values(data).some(post => post.author && post.author.toLowerCase() === nickname.toLowerCase());
+        }
 
         function updateProfileUI() {
             if (!currentUser) {
@@ -268,7 +322,7 @@
             }
         }
 
-        // 회원탈퇴 (내용 유지, 사용자 정보 삭제)
+        // 회원탈퇴
         function handleDeleteAccount() {
             if (confirm("정말 탈퇴하시겠습니까?\n작성한 게시글은 지워지지 않고 사용자 정보만 삭제됩니다.")) {
                 localStorage.removeItem('pixel_user');
